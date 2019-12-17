@@ -39,10 +39,14 @@ watcher.on('change', path => {
   const distJSONPath = Path.resolve(__dirname, tsconfig.T2J.outDir);
   const finalPath = Path.join(distJSONPath, `${filePureName}.json`);
 
-  fse.outputJson(finalPath, jsFile, {
+  delete require.cache[jsPath];
+
+  if (!jsFile.default) {
+    return
+  }
+
+  fse.outputJson(finalPath, jsFile.default, {
     spaces: tsconfig.T2J.spacing,
     replacer: tsconfig.T2J.replacer
   });
-
-  delete require.cache[jsPath]
 });
