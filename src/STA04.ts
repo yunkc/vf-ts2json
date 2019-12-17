@@ -13,10 +13,10 @@ const Xiaoming: People = {
 const ZhangFeng: People = {
     age: 22,
     sex: PeopleSex.female,
-    name: 'ZhangFeng',
+    name: 'Zhang',
     height: 166,
     weight: 42,
-    isMarry: false
+    isMarry: true,
 };
 
 export default {
