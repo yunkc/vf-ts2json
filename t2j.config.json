@@ -1,0 +1,7 @@
+{
+  "spacing": 2,
+  "exclude": [],
+  "debug": false,
+  "replacer": "",
+  "outDir": "../Demo-Project/dist-json/"
+}

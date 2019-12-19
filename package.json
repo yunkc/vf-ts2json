@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc -w & node node.build.js"
+    "start": "tsc -w & node t2j.build.js"
   },
   "author": "haojenma",
   "license": "ISC",

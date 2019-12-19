@@ -12,7 +12,7 @@
 //    "jsx": "preserve",                     /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
     "declaration": false,                   /* Generates corresponding '.d.ts' file. */
     "sourceMap": false,                     /* Generates corresponding '.map' file. */
-    "outDir": "dist_JS/",                        /* Redirect output structure to the directory. */
+    "outDir": "dist/",                        /* Redirect output structure to the directory. */
 //    "rootDir": "./",                       /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
     "removeComments": true,                /* Do not emit comments to output. */
 //    "noEmit": true,                        /* Do not emit outputs. */
@@ -55,16 +55,11 @@
   "include": [
     "src/*",
     "src/**/*",
-    "lib/*",
-    "lib/**/*"
+    "types/*",
+    "types/**/*"
   ],
   "exclude": [
     "node_modules",
-    "node.build.js"
-  ],
-  "T2J": {
-    "spacing": 2,
-    "debug": false,
-    "outDir": "dist_JSON/"
-  }
+    "t2j.build.js"
+  ]
 }
