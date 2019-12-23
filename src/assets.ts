@@ -1,4 +1,4 @@
-import {Assets} from '../../types/IVFTemplate'
+import {Assets} from '../types/IVFTemplate'
 
 const assets = {
     choiceButtonSuccess: {

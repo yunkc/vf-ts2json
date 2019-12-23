@@ -2,7 +2,7 @@ import scenes from './scene'
 import assets from './assets'
 import global from './global'
 import components from './components'
-import {IVFTemplate, LoadMode, ScaleMode} from "../../types/IVFTemplate";
+import {IVFTemplate, LoadMode, ScaleMode} from "../types/IVFTemplate";
 
 const main: IVFTemplate = {
     assets,

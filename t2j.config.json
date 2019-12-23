@@ -3,5 +3,6 @@
   "exclude": [],
   "debug": false,
   "replacer": "",
-  "outDir": "../Demo-Project/dist-json/"
+  "outDir": "../Demo-Project/dist-json/",
+  "entry": "./src/index.js"
 }

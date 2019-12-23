@@ -33,6 +33,14 @@ watcher.on('change', path => {
     return
   }
 
+  const entryPath = Path.resolve(config.T2J.entry);
+  const projectPath = entryPath.split(__dirname)[1];
+
+
+  if (jsPath.indexOf(projectPath) === -1) {
+    return;
+  }
+
   fse.outputJson(finalPath, jsFile.default, {
     spaces: config.T2J.spacing,
     replacer: config.T2J.replacer

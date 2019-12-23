@@ -1,4 +1,4 @@
-import {Components} from "../../types/IVFTemplate";
+import {Components} from "../types/IVFTemplate";
 
 const root: Components.custom = {
     type: Components.type.custom,
