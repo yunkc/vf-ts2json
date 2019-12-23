@@ -1,5 +1,3 @@
-import components from "../src/components";
-
 export interface IVFTemplate {
     assets: Assets.assets,
     global: {

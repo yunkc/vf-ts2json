@@ -10,11 +10,7 @@ const config = {
   outDir: tsconfig.compilerOptions.outDir
 }
 
-const watcher = chokidar.watch(config.outDir, {
-  // ignored: function () {
-  //
-  // }
-});
+const watcher = chokidar.watch(config.outDir);
   
 watcher.on('change', path => {
   const jsPath = Path.resolve(__dirname, path);
