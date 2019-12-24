@@ -17,13 +17,12 @@ export interface IVFTemplate {
     }
 }
 
-
 export namespace Assets {
     export interface assets {
         [key: string]: {
             type: type,
             url: string
-            name?: string,
+            name: string,
         }
     }
 
@@ -59,16 +58,33 @@ export namespace Components {
         name?: string,
     }
 
-    export interface button extends base{
+    export interface displayComponent {
+        x?: number;
+        y?: number;
+        scaleX?: number;
+        scaleY?: number;
+        alpha?: number;
+        color?: number;
+        visible?: boolean;
+
+        rotation?: any;
+        width?: number;
+        height?: number;
+    }
+
+    export interface button extends base, displayComponent {
         type: type.button
     }
 
-    export interface custom extends base{
+    export interface custom extends base, displayComponent {
         type: type.custom,
-        children: []
+        children?: any,
+        animations?: any,
+        props?: any,
+        actionList?: any
     }
 
-    export interface checkbox extends base{
+    export interface checkbox extends base, displayComponent{
         type: type.checkbox,
         up: string,
         down: string,
@@ -80,21 +96,19 @@ export namespace Components {
         checkGroup: string
     }
 
-    export interface image extends base{
+    export interface image extends base, displayComponent {
         type: type.image,
-        src: string,
-        width?: number,
-        height: number
+        src: string
     }
 
-    export interface text extends base{
+    export interface text extends base, displayComponent {
         type: type.text,
         style?: Object
     }
 
     export enum type {
         text = 'text',
-        rect = 'rect',
+        rect = 'Rect',
         image = 'Image',
         table = 'table',
         input = 'input',

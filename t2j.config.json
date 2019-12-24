@@ -3,6 +3,6 @@
   "exclude": [],
   "debug": false,
   "replacer": "",
-  "outDir": "../Demo-Project/dist-json/",
-  "entry": "./src/index.js"
+  "entry": "./src/index.js",
+  "outDir": "../Demo-Project/vf-json/"
 }
