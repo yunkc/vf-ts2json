@@ -1,3 +1,4 @@
+import {App} from './store'
 import scenes from './scene'
 import assets from './assets'
 import global from './global'
@@ -8,14 +9,14 @@ const Main: IVFTemplate = {
     assets,
     global,
     scenes,
-    width: 1200,
     components,
-    height: 900,
-    baseUrl: '',
-    name: '',
-    conversion: '',
-    version: '0.0.1',
+    name: App.name,
+    width: App.width,
+    height: App.height,
+    version: App.version,
+    baseUrl: App.baseUrl,
     loadMode: LoadMode.all,
+    conversion: App.conversion,
     scaleMode: ScaleMode.showAll
 }
 

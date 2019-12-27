@@ -1,16 +1,31 @@
-import {Res} from "./store";
+import {Store} from "./store";
 import {Assets} from '../types/IVFTemplate'
 
 const assets = {
-    [Res.choiceButtonSuccess]: {
+    [Store.titleBackground]: {
         type: Assets.type.image,
-        name: Res.choiceButtonSuccess,
-        url: 'https://mms.businesswire.com/media/20191025005023/en/747781/23/VF_Blue_Ball_New_Logo.jpg'
+        name: Store.titleBackground.toString(),
+        url: 'title-background.png'
     },
-    [Res.choiceButtonFail]: {
+    [Store.choiceButtonRight]: {
         type: Assets.type.image,
-        name: Res.choiceButtonFail,
-        url: 'https://thevinylfactory.com/wp-content/uploads/2017/01/VFselects-logo-2-1.png',
+        name: Store.choiceButtonRight.toString(),
+        url: 'choice-static-success.png'
+    },
+    [Store.choiceButtonWrong]: {
+        type: Assets.type.image,
+        name: Store.choiceButtonWrong.toString(),
+        url: 'choice-static-wrong.png',
+    },
+    [Store.contentImgBorder]: {
+        type: Assets.type.image,
+        name: Store.contentImgBorder.toString(),
+        url: 'content-image-border.png'
+    },
+    [Store.contentQuestionImg]: {
+        type: Assets.type.image,
+        name: Store.contentQuestionImg.toString(),
+        url: 'content-question-img.png'
     }
 }
 

@@ -4,5 +4,5 @@
   "debug": false,
   "replacer": "",
   "entry": "./src/index.js",
-  "outDir": "../Demo-Project/vf-json/"
+  "outDir": "../Web/vf-json/"
 }
