@@ -10,9 +10,13 @@ Use Typescript build JSON files
 ## 4. t2j.config.json 
   ```js
   {
-    "spacing": 2, // dist json files spacing
-    "debug": false, // enable or disable debug mode
-    "entry": "./src/index.js", // config you entry file
-    "outDir": "../Web/vf-json/" // dist output path 
+      // config you entry file
+      "entry": "./src/index.js",   
+      // dist output path 
+      "outDir": "../Web/vf-json/",
+      // dist json files spacing
+      "spacing": 2, 
+      // enable or disable debug mode
+      "debug": false 
   }
 ```
