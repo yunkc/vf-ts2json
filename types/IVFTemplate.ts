@@ -1,4 +1,4 @@
-import {Widget} from './Components'
+import {Widget} from './Component'
 
 export interface IVFTemplate {
     assets: Assets.assets,

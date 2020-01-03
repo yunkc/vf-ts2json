@@ -1,16 +1,18 @@
 import {App, Store} from "./store";
-import {Widget, WidgetType, Action, ActionType, Express, Style} from "../types/Components";
+import {Widget, WidgetType} from "../types/Component";
+import {Style} from "../types/Style";
 
-const printLog: Action.Print = {
-    type: ActionType.Print,
-    value: 'hi😊 VFT2J'
-};
+
+// const printLog: Action.Print = {
+//     type: ActionType.Print,
+//     value: 'hi😊 VFT2J'
+// };
 
 
 const titleBackgroundWidth = 510,
       titleBackgroundHeight = 70;
 
-const titleBackground: Widget.Image = {
+const titleBackground: Widget.Image= {
     type: WidgetType.image,
     width: titleBackgroundWidth,
     height: titleBackgroundHeight,
