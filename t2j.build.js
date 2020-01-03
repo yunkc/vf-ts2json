@@ -18,7 +18,11 @@ function getEntryFile() {
 }
 
 const watcher = chokidar.watch(config.outDir);
-  
+
+const VFSParser = require('./build/VFScriptParser').default;
+
+
+
 watcher.on('change', path => {
   const distTargetPath = Path.resolve(__dirname, config.T2J.outDir);
   const distTargetFullPath = Path.join(distTargetPath, `${getEntryFile()}.json`);
@@ -27,6 +31,16 @@ watcher.on('change', path => {
 
   delete require.cache[entryJSPath];
   delete require.cache[Path.resolve(__dirname, path)];
+
+  const entryJSON = require(entryJSPath).default
+
+  Object.keys(entryJSON.components).forEach(key => {
+    const widget = entryJSON.components[key];
+
+    if (widget.type === 'custom' && typeof widget.actionList === 'string') {
+      widget.actionList = new VFSParser().parse(widget.actionList)
+    }
+  });
 
   fse.outputJson(distTargetFullPath, require(entryJSPath).default, {
     spaces: config.T2J.spacing,

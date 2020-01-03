@@ -28,7 +28,7 @@ export namespace Widget {
         children?: CustomChildrenItem[],
         animations?: [],
         props?: object,
-        actionList?: ActionType[]
+        actionList?: ActionType[] | String
     }
 
     export interface CustomChildrenItem extends DisplayComponent{
