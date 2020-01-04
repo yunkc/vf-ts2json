@@ -42,8 +42,5 @@ watcher.on('change', path => {
     }
   });
 
-  fse.outputJson(distTargetFullPath, require(entryJSPath).default, {
-    spaces: config.T2J.spacing,
-    replacer: config.T2J.replacer
-  });
+  fse.outputJson(distTargetFullPath, require(entryJSPath).default, {spaces: config.T2J.spaces});
 });
