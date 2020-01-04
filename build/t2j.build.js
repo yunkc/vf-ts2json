@@ -21,8 +21,6 @@ const watcher = chokidar.watch(config.outDir);
 
 const VFSParser = require('./build/VFScriptParser').default;
 
-
-
 watcher.on('change', path => {
   const distTargetPath = Path.resolve(__dirname, config.T2J.outDir);
   const distTargetFullPath = Path.join(distTargetPath, `${getEntryFile()}.json`);
