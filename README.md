@@ -13,10 +13,10 @@ Here is ```t2j.config.json``` config
       "entry": "./src/index.js",
          
       // dist output path 
-      "outDir": "../Web/vf-json/",
+      "output": "./vf-json/",
       
       // dist json files spacing
-      "spacing": 2,
+      "spaces": 2,
        
       // enable or disable debug mode
       "debug": false 

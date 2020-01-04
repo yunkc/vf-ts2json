@@ -3,4 +3,5 @@ dist_JSON/
 node_modules/
 .idea/
 dist/
+/vf-json
 
