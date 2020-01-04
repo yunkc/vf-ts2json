@@ -114,13 +114,7 @@ const root: Widget.Custom = {
             }
         }
     ],
-    actionList: `
-        @35 = {
-            this#42.on('click', ()=> {
-                playSound(26, 1000000);
-            });
-        }
-    `
+    actionList: []
 };
 
 
