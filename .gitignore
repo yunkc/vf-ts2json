@@ -4,5 +4,3 @@ node_modules/
 .idea/
 dist/
 /vf-json
-t2j.config.json
-
