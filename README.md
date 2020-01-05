@@ -15,6 +15,7 @@ Use Typescript build JSON files
 2. ```npm install``` all dependence 
 3. ```npm run start``` run you project
 4. Check you ```t2j.config.json``` file, make sure it's what you want!
+5. and other details improve
 
 Here is ```t2j.config.json``` config 
   ```js
