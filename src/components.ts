@@ -114,7 +114,7 @@ const root: Widget.Custom = {
             }
         }
     ],
-    actionList: []
+    actionList: ``
 };
 
 

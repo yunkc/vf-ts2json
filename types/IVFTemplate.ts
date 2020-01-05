@@ -55,7 +55,6 @@ export namespace Scenes {
     }
 }
 
-
 export enum ScaleMode {
     cover = 'cover',
     showAll = 'showAll',

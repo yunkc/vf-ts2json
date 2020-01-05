@@ -13,7 +13,6 @@ export namespace Action {
     }
 }
 
-
 export enum ActionType {
     Print,
     Add,
