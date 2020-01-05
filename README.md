@@ -1,6 +1,16 @@
 # Typescript-to-JSON
 Use Typescript build JSON files
 
+## Release Note
+
+### 01.05.2020
+1. add Loader module
+2. refactor t2j build module
+3. remove ```t2j.build.js``` to build folder
+4. change ```t2j.config.json``` API
+
+## How to use
+
 1. First clone or download this project
 2. ```npm install``` all dependence 
 3. ```npm run start``` run you project
