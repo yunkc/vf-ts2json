@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "debug": "node build/t2j.build.js",
-    "start": "tsc -w & node build/t2j.build.js"
+    "debug": "node build/t2j.core.js",
+    "start": "tsc -w & node build/t2j.core.js"
   },
   "author": "haojenma",
   "license": "ISC",

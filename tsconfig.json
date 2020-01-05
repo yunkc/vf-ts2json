@@ -27,6 +27,6 @@
   ],
   "exclude": [
     "node_modules",
-    "build/t2j.build.js"
+    "build/t2j.core.js"
   ]
 }
