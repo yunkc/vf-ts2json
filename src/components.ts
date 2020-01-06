@@ -114,7 +114,11 @@ const root: Widget.Custom = {
             }
         }
     ],
-    actionList: ``
+    actionList: `
+    @this = {
+        print('hello, vfx.');
+    }
+    `
 };
 
 

@@ -14,6 +14,7 @@ var ExpressItemType;
     ExpressItemType[ExpressItemType["OBJECT_VALUE"] = 8] = "OBJECT_VALUE";
     ExpressItemType[ExpressItemType["PARAM_VALUE"] = 9] = "PARAM_VALUE";
     ExpressItemType[ExpressItemType["ARRAY_FUNCTION"] = 10] = "ARRAY_FUNCTION";
+    ExpressItemType[ExpressItemType["COMPONENT"] = 11] = "COMPONENT";
 })(ExpressItemType = exports.ExpressItemType || (exports.ExpressItemType = {}));
 var SystemValueType;
 (function (SystemValueType) {

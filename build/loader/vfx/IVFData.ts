@@ -262,6 +262,7 @@
         OBJECT_VALUE,  // 对象取值
         PARAM_VALUE,   // 参数取值
         ARRAY_FUNCTION, // 数组 pop push shift unshift concat splice
+        COMPONENT,     // 组件
     }
     export enum SystemValueType {
         TIME,
