@@ -4,11 +4,11 @@ Use Typescript build JSON files
 ## Release Note
 
 ### 01.05.2020
-1. add Loader module
-2. refactor t2j build module
-3. remove ```t2j.build.js``` to build folder
-4. change ```t2j.config.json``` API
-5. and other details improve
+1. Add Loader module
+2. Refactor t2j build module
+3. Remove ```t2j.build.js``` to build folder
+4. Change ```t2j.config.json``` API
+5. And other details improve
 
 ## How to use
 
