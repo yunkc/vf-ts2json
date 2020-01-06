@@ -56,6 +56,7 @@ var VFS_Keyword;
     VFS_Keyword["True"] = "true";
     VFS_Keyword["False"] = "false";
     VFS_Keyword["Print"] = "print";
+    VFS_Keyword["Trace"] = "trace";
     VFS_Keyword["This"] = "this";
     VFS_Keyword["Global"] = "global";
     VFS_Keyword["System"] = "system";
@@ -371,6 +372,7 @@ var VFScriptParser = /** @class */ (function () {
                         token.type = TokenType.Comma;
                         break;
                     case VFS_Keyword.Print:
+                    case VFS_Keyword.Trace:
                         token.type = TokenType.Print;
                         break;
                     case VFS_Keyword.This:
@@ -489,6 +491,7 @@ var VFScriptParser = /** @class */ (function () {
         var action;
         var tokenActionList0 = TokenType.ActionList + TokenType.String + TokenType.Equal + TokenType.Block;
         var tokenActionList1 = TokenType.ActionList + TokenType.Number + TokenType.Equal + TokenType.Block;
+        var tokenActionList2 = TokenType.ActionList + TokenType.This + TokenType.Equal + TokenType.Block;
         for (var i = 0, len = tokens.length; i < len; i++) {
             var token = tokens[i];
             if (token.type === TokenType.Semicolon) {
@@ -500,7 +503,9 @@ var VFScriptParser = /** @class */ (function () {
                 astStack.push(token);
                 curToken += token.type.toString();
             }
-            if (curToken === tokenActionList0 || curToken === tokenActionList1) { // @处理漏写分号
+            if (curToken === tokenActionList0 ||
+                curToken === tokenActionList1 ||
+                curToken === tokenActionList2) { // @处理漏写分号
                 action = this.parseActionList(astStack.concat()); // 解析动作列表
                 astStack.length = 0;
                 curToken = '';
@@ -519,7 +524,10 @@ var VFScriptParser = /** @class */ (function () {
         var action;
         var tokenActionList0 = TokenType.ActionList + TokenType.String + TokenType.Equal + TokenType.Block;
         var tokenActionList1 = TokenType.ActionList + TokenType.Number + TokenType.Equal + TokenType.Block;
-        if (curToken === tokenActionList0 || curToken === tokenActionList1) {
+        var tokenActionList2 = TokenType.ActionList + TokenType.This + TokenType.Equal + TokenType.Block;
+        if (curToken === tokenActionList0 ||
+            curToken === tokenActionList1 ||
+            curToken === tokenActionList2) {
             action = this.parseActionList(astStack.concat()); // 解析动作列表
         }
         else if (this.regComment.test(curToken)) {
@@ -1377,6 +1385,7 @@ var VFScriptParser = /** @class */ (function () {
             OBJECT_VALUE,  // 对象取值 ok
             PARAM_VALUE,   // 参数取值 ok
             ARRAY_FUNCTION, // 数组 pop push shift unshift concat splice ok
+            COMPONENT, // 组件， 仅在print/trace中使用
         */
         if (!tokens || tokens.length === 0) {
             return undefined;
@@ -1388,6 +1397,7 @@ var VFScriptParser = /** @class */ (function () {
         var regArrayIndex = new RegExp(ArrayIndexToken);
         var regArrayLength = new RegExp(ArrayLengthToken);
         var regArrayFunction = new RegExp(ArrayFunctionToken);
+        var regComponent = new RegExp(VfComponentToken);
         // this.log('parse express item:', tokenType);
         // this.log('PropertyToken', PropertyToken);
         // this.log('ValueToken', ValueToken);
@@ -1417,6 +1427,10 @@ var VFScriptParser = /** @class */ (function () {
         else if (regObjectValue.test(tokenType)) {
             this.log('parse object ');
             return this.parseVariable(tokens);
+        }
+        else if (regComponent.test(tokenType)) {
+            this.log('parse component');
+            return this.parseComponentExpress(tokens);
         }
         else if (regConst.test(tokenType)) {
             this.log('parse const');
@@ -1523,6 +1537,30 @@ var VFScriptParser = /** @class */ (function () {
                 express[1] = index;
             }
         }
+        return express;
+    };
+    VFScriptParser.prototype.parseComponentExpress = function (tokens) {
+        var express = [IVFData_1.ExpressItemType.COMPONENT];
+        var target = [];
+        var i = 0;
+        var len = 0;
+        for (i = 0, len = tokens.length; i < len; i++) {
+            if (tokens[i].type === TokenType.This ||
+                tokens[i].type === TokenType.Child) {
+                continue;
+            }
+            else if (tokens[i].type === TokenType.Global) {
+                target.push(-1);
+            }
+            else if (tokens[i].type === TokenType.String ||
+                tokens[i].type === TokenType.Number) {
+                target.push(tokens[i].value);
+            }
+            else if (tokens[i].type === TokenType.Dot) {
+                break;
+            }
+        }
+        express.push(target);
         return express;
     };
     VFScriptParser.prototype.parseProperty = function (tokens) {
