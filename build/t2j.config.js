@@ -8,7 +8,7 @@ const CONFIG = {
   baseURL: '../',
   spaces: t2jconfig.spaces || 2,
   debug: t2jconfig.debug   || false,
-  entry: Utils.checkEntryName(t2jconfig.entry) || 'index.js',
+  entry: Utils.checkEntryName(t2jconfig.entry) || 'src/index.js',
   output: t2jconfig.output || '/vf-json',
   jsOutput: tsconfig.compilerOptions.outDir,
 }
