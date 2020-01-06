@@ -8,14 +8,15 @@ Use Typescript build JSON files
 2. refactor t2j build module
 3. remove ```t2j.build.js``` to build folder
 4. change ```t2j.config.json``` API
+5. and other details improve
 
 ## How to use
 
 1. First clone or download this project
-2. ```npm install``` all dependence 
-3. ```npm run start``` run you project
-4. Check you ```t2j.config.json``` file, make sure it's what you want!
-5. and other details improve
+2. ```npm install``` all dependence
+3. Check you ```t2j.config.json``` file, make sure it's what you want! 
+4. ```npm run start``` run you project
+
 
 Here is ```t2j.config.json``` config 
   ```js
@@ -23,7 +24,7 @@ Here is ```t2j.config.json``` config
       // config you entry file
       "entry": "./src/index.js",
          
-      // dist output path 
+      // dist output path
       "output": "./vf-json/",
       
       // dist json files spacing
