@@ -26,7 +26,6 @@
     "types/**/*"
   ],
   "exclude": [
-    "node_modules",
-    "build/t2j.core.js"
+    "node_modules"
   ]
 }

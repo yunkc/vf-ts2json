@@ -115,9 +115,9 @@ const root: Widget.Custom = {
         }
     ],
     actionList: `
-    @this = {
-        print('hello, vfx.');
-    }
+        @this = {
+            print('hello, vfx.');
+        }
     `
 };
 

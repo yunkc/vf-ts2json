@@ -20,6 +20,7 @@ setTimeout(() => {
   Log.info(`Entry ${entryFileName}.js files target path: ${CONFIG.entry}`)
   Log.info(`Dist .JSON files target path: ${distJSON}`)
 }, 400)
+
 watcher.on('change', path => {
   delete require.cache[path]
   delete require.cache[CONFIG.entry]
