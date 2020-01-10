@@ -1,6 +1,4 @@
-dist_JS/
-dist_JSON/
+.DS_Store
 node_modules/
-.idea/
-dist/
-/vf-json
+/.idea
+/dist
