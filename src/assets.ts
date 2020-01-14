@@ -5,27 +5,27 @@ const assets = {
     [Store.titleBackground]: {
         type: Assets.type.image,
         name: Store.titleBackground.toString(),
-        url: 'dino.png'
+        url: './assets/dino.png'
     },
     [Store.choiceButtonRight]: {
         type: Assets.type.image,
         name: Store.choiceButtonRight.toString(),
-        url: 'dino.png'
+        url: './assets/dino.png'
     },
     [Store.choiceButtonWrong]: {
         type: Assets.type.image,
         name: Store.choiceButtonWrong.toString(),
-        url: 'dino.png',
+        url: './assets/dino.png',
     },
     [Store.contentImgBorder]: {
         type: Assets.type.image,
         name: Store.contentImgBorder.toString(),
-        url: 'dino.png'
+        url: './assets/dino.png'
     },
     [Store.contentQuestionImg]: {
         type: Assets.type.image,
         name: Store.contentQuestionImg.toString(),
-        url: 'dino.png'
+        url: './assets/dino.png'
     }
 }
 
