@@ -15,5 +15,5 @@ export namespace App {
     export const height = 500;
     export const conversion = '';
     export const version = '0.0.1';
-    export const baseUrl = 'http://0.0.0.0/static/';
+    export const baseUrl = './vf-json/';
 }
