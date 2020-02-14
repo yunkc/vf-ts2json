@@ -23,4 +23,4 @@ var SystemValueType;
     SystemValueType[SystemValueType["MONTH"] = 2] = "MONTH";
     SystemValueType[SystemValueType["DAY"] = 3] = "DAY";
     SystemValueType[SystemValueType["DATE"] = 4] = "DATE";
-})(SystemValueType = exports.SystemValueType || (exports.SystemValueType = {}));
+})(SystemValueType = exports.SystemValueType || (exports.SystemValueType = {}))
