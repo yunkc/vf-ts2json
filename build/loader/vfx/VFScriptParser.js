@@ -35,6 +35,9 @@ var TokenType;
     TokenType["ArrayFunction"] = "C";
     TokenType["Length"] = "D";
     TokenType["Colon"] = "E";
+    TokenType["For"] = "F";
+    TokenType["In"] = "G";
+    TokenType["Break"] = "H";
 })(TokenType || (TokenType = {}));
 var VFS_Keyword;
 (function (VFS_Keyword) {
@@ -52,6 +55,8 @@ var VFS_Keyword;
     VFS_Keyword["JumpToNextScene"] = "jumpToNextScene";
     VFS_Keyword["JumpToPrevScene"] = "jumpToPrevScene";
     VFS_Keyword["playAnimation"] = "playAnimation";
+    VFS_Keyword["gotoPlay"] = "gotoPlay";
+    VFS_Keyword["gotoStop"] = "gotoStop";
     VFS_Keyword["Emit"] = "emit";
     VFS_Keyword["True"] = "true";
     VFS_Keyword["False"] = "false";
@@ -68,6 +73,9 @@ var VFS_Keyword;
     VFS_Keyword["Concat"] = "concat";
     VFS_Keyword["Splice"] = "splice";
     VFS_Keyword["Length"] = "length";
+    VFS_Keyword["For"] = "for";
+    VFS_Keyword["In"] = "in";
+    VFS_Keyword["Break"] = "break";
     // 下面为单字符关键词
     VFS_Keyword["Enter"] = "\n";
     VFS_Keyword["Space"] = " ";
@@ -141,6 +149,8 @@ var RegType;
     RegType[RegType["VFFunction"] = 6] = "VFFunction";
     RegType[RegType["CusFunction"] = 7] = "CusFunction";
     RegType[RegType["ArrayRandom"] = 8] = "ArrayRandom";
+    RegType[RegType["For"] = 9] = "For";
+    RegType[RegType["Break"] = 10] = "Break";
 })(RegType || (RegType = {}));
 var TokenALL = '[0-9a-zA-Z]';
 var VfComponentToken = '(' + '(' + TokenType.This + '|' + TokenType.Global + ')' + '(' + TokenType.Child +
@@ -171,7 +181,7 @@ var VFScriptParser = /** @class */ (function () {
     function VFScriptParser() {
         this.debug = false;
         this.regNumber = /^\d+$/;
-        this.regDefineVariable = new RegExp(TokenType.DefaultVariable + TokenType.Variable +
+        this.regDefineVariable = new RegExp(TokenType.DefaultVariable + '(' + TokenType.Global + ')?' + TokenType.Variable +
             '[' + TokenType.String + TokenType.Number + ']' +
             TokenType.Equal + TokenALL + '+'); // /56(7|8)3[0-9]*/;  var $str00 = adfafa
         this.regDefineFunction = new RegExp(TokenType.Function + TokenType.String +
@@ -194,6 +204,8 @@ var VFScriptParser = /** @class */ (function () {
         this.regClosureMaybe = new RegExp(TokenType.Bracket + TokenType.Equal + TokenType.Option + TokenType.Block);
         this.regEventListenerFun = new RegExp('(' + VfComponentToken + TokenType.Dot + TokenType.String + ')');
         this.regArrayRandom = new RegExp(ArrayRandomToken);
+        this.regFor = new RegExp(TokenType.For + TokenType.Bracket + TokenType.Block);
+        this.regBreak = new RegExp(TokenType.Break);
         this.actionRegs = [
             this.regDefineVariable,
             this.regDefineFunction,
@@ -204,6 +216,8 @@ var VFScriptParser = /** @class */ (function () {
             this.regVFFunction,
             this.regCusFunction,
             this.regArrayRandom,
+            this.regFor,
+            this.regBreak,
         ];
         this.scriptStr = '';
         this.functionParams = [];
@@ -390,6 +404,15 @@ var VFScriptParser = /** @class */ (function () {
                     case VFS_Keyword.Length:
                         token.type = TokenType.Length;
                         break;
+                    case VFS_Keyword.For:
+                        token.type = TokenType.For;
+                        break;
+                    case VFS_Keyword.In:
+                        token.type = TokenType.In;
+                        break;
+                    case VFS_Keyword.Break:
+                        token.type = TokenType.Break;
+                        break;
                     case VFS_Keyword.Pop:
                     case VFS_Keyword.Push:
                     case VFS_Keyword.Shift:
@@ -408,6 +431,8 @@ var VFScriptParser = /** @class */ (function () {
                     case VFS_Keyword.JumpToNextScene:
                     case VFS_Keyword.JumpToPrevScene:
                     case VFS_Keyword.playAnimation:
+                    case VFS_Keyword.gotoPlay:
+                    case VFS_Keyword.gotoStop:
                         token.type = TokenType.VFFunction;
                         break;
                     case VFS_Keyword.Add:
@@ -639,6 +664,12 @@ var VFScriptParser = /** @class */ (function () {
                     case RegType.ArrayRandom:
                         action = this.parseArrayRandom(tokens);
                         break;
+                    case RegType.For:
+                        action = this.parseFor(tokens);
+                        break;
+                    case RegType.Break:
+                        action = this.parseBreak(tokens);
+                        break;
                     default:
                         break;
                 }
@@ -651,32 +682,43 @@ var VFScriptParser = /** @class */ (function () {
     };
     //////////////////////// 以下为解析实际的action每个都与一个ActionType对应////////////
     VFScriptParser.prototype.parseDefineVariable = function (tokens) {
+        var idIndex = 2;
+        var valueIndex = 4;
+        var isGlobal = false;
+        if (tokens.length === 6) {
+            idIndex = 3;
+            valueIndex = 5;
+            isGlobal = true;
+        }
         var defineVariableTask = {
             type: 37 /* DefineVariable */,
             variableType: "string" /* STRING */,
             value: '',
-            varId: tokens[2].value
+            varId: tokens[idIndex].value
         };
-        if (tokens[4].type === TokenType.Number || tokens[4].type === TokenType.String) {
+        if (isGlobal) {
+            defineVariableTask.target = [-1];
+        }
+        if (tokens[valueIndex].type === TokenType.Number || tokens[valueIndex].type === TokenType.String) {
             defineVariableTask.variableType = "number" /* NUMBER */;
-            defineVariableTask.value = this.parseNumberFromTokens(tokens, 4);
+            defineVariableTask.value = this.parseNumberFromTokens(tokens, valueIndex);
         }
-        else if (tokens[4].type === TokenType.Quotation ||
-            tokens[4].type === TokenType.DoubleQuotation) {
+        else if (tokens[valueIndex].type === TokenType.Quotation ||
+            tokens[valueIndex].type === TokenType.DoubleQuotation) {
             defineVariableTask.variableType = "string" /* STRING */;
-            defineVariableTask.value = this.parseStringFromTokens(tokens, 4);
+            defineVariableTask.value = this.parseStringFromTokens(tokens, valueIndex);
         }
-        else if (tokens[4].type === TokenType.Boolean) {
+        else if (tokens[valueIndex].type === TokenType.Boolean) {
             defineVariableTask.variableType = "boolean" /* BOOLEAN */;
-            defineVariableTask.value = tokens[4].value === VFS_Keyword.True ? true : false;
+            defineVariableTask.value = tokens[valueIndex].value === VFS_Keyword.True ? true : false;
         }
-        else if (tokens[4].type === TokenType.Block) {
+        else if (tokens[valueIndex].type === TokenType.Block) {
             defineVariableTask.variableType = "object" /* OBJECT */;
-            defineVariableTask.value = this.parseObjectFromBlock(tokens[4]);
+            defineVariableTask.value = this.parseObjectFromBlock(tokens[valueIndex]);
         }
-        else if (tokens[4].type === TokenType.SquareBracket) {
+        else if (tokens[valueIndex].type === TokenType.SquareBracket) {
             defineVariableTask.variableType = "array" /* ARRAY */;
-            defineVariableTask.value = this.parseArrayFromSquare(tokens[4]);
+            defineVariableTask.value = this.parseArrayFromSquare(tokens[valueIndex]);
         }
         return defineVariableTask;
     };
@@ -823,6 +865,12 @@ var VFScriptParser = /** @class */ (function () {
                     break;
                 case VFS_Keyword.playAnimation:
                     vfFunction = this.parsePlayAnimation(tokens);
+                    break;
+                case VFS_Keyword.gotoPlay:
+                    vfFunction = this.parseGotoPlay(tokens);
+                    break;
+                case VFS_Keyword.gotoStop:
+                    vfFunction = this.parseGotoStop(tokens);
                     break;
                 default:
                     break;
@@ -1147,6 +1195,45 @@ var VFScriptParser = /** @class */ (function () {
         arrayRandom.target = express;
         return arrayRandom;
     };
+    VFScriptParser.prototype.parseFor = function (tokens) {
+        var forin = this.parseForinFromBracket(tokens[1]);
+        if (forin) {
+            var forTask = {
+                type: 38 /* For */,
+                forin: forin,
+                execute: this.parseBlock(tokens[2])
+            };
+            if (this.functionParams.length) {
+                this.functionParams.pop();
+            }
+            return forTask;
+        }
+        return undefined;
+    };
+    VFScriptParser.prototype.parseBreak = function (tokens) {
+        var breakTask = {
+            type: 39 /* Break */
+        };
+        return breakTask;
+    };
+    VFScriptParser.prototype.parseGotoPlay = function (tokens) {
+        var funAction = this.parseCusFunction(tokens);
+        if (funAction) {
+            funAction.type = 30 /* CallProtoFunction */;
+            funAction.name = 'gotoPlay';
+            return funAction;
+        }
+        return undefined;
+    };
+    VFScriptParser.prototype.parseGotoStop = function (tokens) {
+        var funAction = this.parseCusFunction(tokens);
+        if (funAction) {
+            funAction.type = 30 /* CallProtoFunction */;
+            funAction.name = 'gotoStop';
+            return funAction;
+        }
+        return undefined;
+    };
     //////////////////////// 以上为解析实际的action每个都与一个ActionType对应////////////
     VFScriptParser.prototype.parseNumberFromTokens = function (tokens, start) {
         var numStr = '';
@@ -1171,10 +1258,10 @@ var VFScriptParser = /** @class */ (function () {
                 return parseInt(numStr, 16);
             }
             // tslint:disable-next-line: no-console
-            console.warn('parseNumber error:', startToken.value);
+            this.warn('parseNumber error:', startToken.value);
         }
         // tslint:disable-next-line: no-console
-        console.warn('parseNumber error:', startToken);
+        this.warn('parseNumber error:', startToken);
         return 0;
     };
     VFScriptParser.prototype.parseStringFromTokens = function (tokens, start) {
@@ -1905,6 +1992,46 @@ var VFScriptParser = /** @class */ (function () {
         }
         return funParam;
     };
+    VFScriptParser.prototype.parseForinFromBracket = function (bracketToken) {
+        var fToken = [];
+        var fTokenType = '';
+        var tokens = [];
+        if (bracketToken.type === TokenType.Bracket || bracketToken.type === TokenType.SquareBracket) {
+            tokens = bracketToken.value;
+        }
+        else {
+            return undefined;
+        }
+        if (tokens.length >= 4 && tokens[2].type === TokenType.In) {
+            var tokenIndex = [tokens[0], tokens[1]];
+            var tokenForin = tokens.concat();
+            tokenForin.splice(0, 3);
+            var index = this.parseVariable(tokenIndex);
+            if (index && index.length >= 3 && index[0] === IVFData_1.ExpressItemType.VARIABLE) {
+                this.functionParams.push(index[2]);
+            }
+            else {
+                this.warn('for in params wrong', tokens);
+                return undefined;
+            }
+            if (tokenForin.length >= 2) {
+                var forin = this.parseVariable(tokenForin);
+                return forin;
+            }
+            else if (tokenForin.length === 1) {
+                var forin = this.parseConst(tokenForin);
+                return forin;
+            }
+            else {
+                this.warn('for in params wrong', tokens);
+                return undefined;
+            }
+        }
+        else {
+            this.warn('for in params wrong', tokens);
+        }
+        return undefined;
+    };
     VFScriptParser.prototype.parseTargetComponent = function (tokens) {
         var target = [];
         var i = 0;
@@ -1950,9 +2077,9 @@ var VFScriptParser = /** @class */ (function () {
         for (var _i = 1; _i < arguments.length; _i++) {
             optionalParams[_i - 1] = arguments[_i];
         }
-        if (!this.debug) {
-            return;
-        }
+        // if (!this.debug) {
+        //     return;
+        // }
         var params = [];
         if (message) {
             params.push(message);
