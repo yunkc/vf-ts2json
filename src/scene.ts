@@ -1,8 +1,8 @@
-import {Store} from "./store";
+import {Ids} from "./store";
 
 export default [
     {
-        id: Store.root.toString(),
-        libId: Store.root.toString()
+        id: Ids.root,
+        libId: Ids.root.toString()
     }
 ]

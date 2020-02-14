@@ -1,19 +1,14 @@
-export enum Store {
+export enum Ids {
     root,
-    titleBackground,
-    contentImgBorder,
-    contentQuestionImg,
-    choiceButtonWrong,
-    choiceButtonRight,
-    contentQuestionImgWithBorderImg,
-    choiceAnswerContainer
+    dinoImage,
+    title
 }
 
 export namespace App {
     export const name = 'VFT2J';
     export const width = 890;
     export const height = 500;
+    export const baseUrl = '';
     export const conversion = '';
     export const version = '0.0.1';
-    export const baseUrl = './vf-json/';
 }

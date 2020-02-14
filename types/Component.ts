@@ -28,7 +28,7 @@ export namespace gui {
         children?: CustomChildrenItem[],
         animations?: [],
         props?: object,
-        actionList?: ActionType[] | String
+        actionList?: ActionType[] | string
     }
 
     export interface CustomChildrenItem extends DisplayComponent{
