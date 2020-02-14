@@ -1,19 +1,12 @@
 import {App, Store} from "./store";
-import {Widget, WidgetType} from "../types/Component";
 import {Style} from "../types/Style";
-
-
-// const printLog: Action.Print = {
-//     type: ActionType.Print,
-//     value: 'hi😊 VFT2J'
-// };
-
+import {gui, guiType} from "../types/gui";
 
 const titleBackgroundWidth = 510,
       titleBackgroundHeight = 70;
 
-const titleBackground: Widget.Image= {
-    type: WidgetType.image,
+const titleBackground: gui.Image= {
+    type: guiType.image,
     width: titleBackgroundWidth,
     height: titleBackgroundHeight,
     src: Store.titleBackground,
@@ -23,8 +16,8 @@ const titleBackground: Widget.Image= {
 
 const contentImgBorderWidth = 293,
       contentImgBorderHeight = 221;
-const contentImgBorder: Widget.Image = {
-    type: WidgetType.image,
+const contentImgBorder: gui.Image = {
+    type: guiType.image,
     width: contentImgBorderWidth,
     height: contentImgBorderHeight,
     src: Store.contentImgBorder,
@@ -36,8 +29,8 @@ const contentImgBorder: Widget.Image = {
 
 const contentQuestionImgWidth = 281,
       contentQuestionImgHeight = 208;
-const contentQuestionImg: Widget.Image = {
-    type: WidgetType.image,
+const contentQuestionImg: gui.Image = {
+    type: guiType.image,
     width: contentQuestionImgWidth,
     height: contentQuestionImgHeight,
     src: Store.contentQuestionImg,
@@ -45,8 +38,8 @@ const contentQuestionImg: Widget.Image = {
     x: App.width / 2 - contentQuestionImgWidth / 2
 };
 
-const contentQuestionImgWithBorderImg: Widget.Custom = {
-    type: WidgetType.custom,
+const contentQuestionImgWithBorderImg: gui.Custom = {
+    type: guiType.custom,
     children: [
         {
             id: Store.contentImgBorder,
@@ -63,22 +56,22 @@ const contentQuestionImgWithBorderImg: Widget.Custom = {
 const choiceImgWidth = 321,
       choiceImgHeight = 70;
 
-const choiceImgStaticRight: Widget.Image = {
-    type: WidgetType.image,
+const choiceImgStaticRight: gui.Image = {
+    type: guiType.image,
     width: choiceImgWidth,
     height: choiceImgHeight,
     src: Store.choiceButtonRight
 };
 
-const choiceImgStaticWrong: Widget.Image = {
-    type: WidgetType.image,
+const choiceImgStaticWrong: gui.Image = {
+    type: guiType.image,
     width: choiceImgWidth,
     height: choiceImgHeight,
     src: Store.choiceButtonWrong
-}
+};
 
-const choiceAnswerContainer: Widget.Custom = {
-    type: WidgetType.custom,
+const choiceAnswerContainer: gui.Custom = {
+    type: guiType.custom,
     children: [
         {
             id: Store.choiceButtonRight,
@@ -89,11 +82,11 @@ const choiceAnswerContainer: Widget.Custom = {
             libId: Store.choiceButtonWrong
         }
     ]
-}
+};
 
 
-const root: Widget.Custom = {
-    type: WidgetType.custom,
+const root: gui.Custom = {
+    type: guiType.custom,
     children: [
         {
             id: Store.titleBackground,
@@ -120,7 +113,6 @@ const root: Widget.Custom = {
         }
     `
 };
-
 
 export default {
     [Store.root]: root,

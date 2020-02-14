@@ -1,7 +1,7 @@
 import {ActionType} from "./Action";
 import {StyleSheet} from "./Style";
 
-export namespace Widget {
+export namespace gui {
     interface Base {
         name?: string,
     }
@@ -20,11 +20,11 @@ export namespace Widget {
     }
 
     export interface Button extends Base, DisplayComponent {
-        type: WidgetType.button
+        type: guiType.button
     }
 
     export interface Custom extends Base, DisplayComponent {
-        type: WidgetType.custom,
+        type: guiType.custom,
         children?: CustomChildrenItem[],
         animations?: [],
         props?: object,
@@ -32,13 +32,15 @@ export namespace Widget {
     }
 
     export interface CustomChildrenItem extends DisplayComponent{
+        name?: string,
+        text?: string
+        style?: StyleSheet
         id: string | number,
         libId: string | number,
-        style?: StyleSheet
     }
 
     export interface Checkbox extends Base, DisplayComponent{
-        type: WidgetType.checkbox,
+        type: guiType.checkbox,
         up: string,
         down: string,
         move: string,
@@ -50,39 +52,44 @@ export namespace Widget {
     }
 
     export interface Image extends Base, DisplayComponent {
-        type: WidgetType.image,
+        type: guiType.image,
         src: string | number
     }
 
     export interface Text extends Base, DisplayComponent {
-        type: WidgetType.text,
+        type: guiType.text,
         style?: Object
     }
+
+    export interface Rect extends Base, DisplayComponent {
+        type: guiType.rect,
+        color: number
+        width: number,
+        height: number,
+        radius?: number,
+    }
+
+    export type AllGUI = gui.Button | gui.Custom | gui.Text | gui.Image | gui.Checkbox | gui.Rect
 }
 
-export enum WidgetType {
-    text = 'text',
+export enum guiType {
+    svg = 'svg',
+    npm = 'npm',
+    text = 'Label',
     rect = 'Rect',
+    video = 'video',
+    audio = 'audio',
+    sheet = 'sheet',
     image = 'Image',
     table = 'table',
     input = 'input',
     slider = 'slider',
     button = 'Button',
     custom = 'custom',
+    graphic = 'graphic',
+    particle = 'particle',
     checkbox = 'CheckBox',
     container = 'container',
-
-    // ANI
     dragonbones = 'dragonbones',
-    particle = 'particle',
-    sheet = 'sheet',
-    // MEDIA
-    video = 'video',
-    audio = 'audio',
     microphone = 'microphone',
-    // NPM
-    npm = 'npm',
-    // VECTOR
-    svg = 'svg',
-    graphic = 'graphic',
 }

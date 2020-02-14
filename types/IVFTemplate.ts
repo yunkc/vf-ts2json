@@ -1,22 +1,18 @@
-import {Widget} from './Component'
+import { gui } from './gui'
 
 export interface IVFTemplate {
-    assets: Assets.assets,
-    global: {
-        [key: string]: Global.global
-    },
-    scenes: Scenes.scene[],
     width: Number,
+    name: String,
     height: Number,
     baseUrl: String,
-    name: String,
+    version: String,
     conversion: String,
     loadMode: LoadMode,
-    version: String,
     scaleMode: ScaleMode,
-    components: {
-        [key: string]: Widget.Button | Widget.Custom | Widget.Text | Widget.Image | Widget.Checkbox
-    }
+    assets: Assets.assets,
+    scenes: Scenes.scene[],
+    global: { [key: string]: GlobalItem },
+    components: { [key: string]: gui.AllGUI }
 }
 
 export namespace Assets {
@@ -40,13 +36,11 @@ export namespace Assets {
     }
 }
 
-export namespace Global {
-    export interface global {
-        type: string,
-        value: any,
-        describe?: string,
-    }
-}
+export type GlobalItem = {
+    value: any,
+    type: string,
+    describe?: string,
+} | number | string | boolean | any
 
 export namespace Scenes {
     export interface scene {
