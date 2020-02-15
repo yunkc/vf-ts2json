@@ -1,3 +1,10 @@
+/*
+*   Update: 2020.02.15
+*   全部文档: https://code.vipkid.com.cn/xyz/docs
+*   动画文档: https://code.vipkid.com.cn/xyz/docs/blob/master/docs/handbook/animation.md
+*   VFX 使用文档: https://code.vipkid.com.cn/xyz/docs/blob/master/docs/handbook/aciton.md
+* */
+
 import {App, Ids} from "./store";
 import {gui, guiType} from "../types/Component";
 
@@ -35,6 +42,7 @@ const root: gui.Custom = {
             x: App.width / 2 - title.width! / 2
         }
     ],
+    // 用 VFX 编写的可执行逻辑，文档请见 https://code.vipkid.com.cn/xyz/docs/blob/master/docs/handbook/aciton.md
     actionList: `
         @this = {
             print('hello, vfx.');
