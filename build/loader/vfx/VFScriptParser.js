@@ -175,7 +175,8 @@ var ArrayIndexToken = '(' + VariableToken + ArrayValueToken + '(' + TokenType.Do
 var ArrayFunctionToken = '(' + VariableToken + TokenType.Dot + TokenType.ArrayFunction + TokenType.Bracket + ')';
 var ArrayLengthToken = '(' + VariableToken + TokenType.Dot + TokenType.Length + ')';
 var ExpressItemToken = '(' + VariableToken + '|' + PropertyToken + '|' + ObjectToken + '|' +
-    ArrayIndexToken + '|' + ArrayFunctionToken + '|' + ArrayLengthToken + ')';
+    ArrayIndexToken + '|' + ArrayFunctionToken + '|' + ArrayLengthToken + '|' +
+    TokenType.Bracket + '|' + VfComponentToken + ')';
 var ArrayRandomToken = '(' + VariableToken + TokenType.Dot + TokenType.Random + TokenType.Bracket + ')';
 var VFScriptParser = /** @class */ (function () {
     function VFScriptParser() {
@@ -1370,6 +1371,7 @@ var VFScriptParser = /** @class */ (function () {
     VFScriptParser.prototype.parseExpressType = function (tokens) {
         var express = [];
         var astStack = [];
+        var lastToken;
         var curToken = '';
         var expressItem;
         var curIsOption = false;
@@ -1378,48 +1380,77 @@ var VFScriptParser = /** @class */ (function () {
         }
         for (var i = 0, len = tokens.length; i < len; i++) {
             var token = tokens[i];
-            if (token.type === TokenType.Option ||
-                token.type === TokenType.Slash ||
-                token.type === TokenType.Equal) {
-                var isMinus = false;
-                if (!curIsOption) {
-                    expressItem = this.parseExpressItem(astStack.concat(), curToken);
-                    astStack.length = 0;
-                    curToken = '';
-                }
-                else if (token.value === VFS_Keyword.Exclamation) { // 处理！
-                    expressItem = this.parseOperate(astStack.concat(), curToken);
-                    astStack.length = 0;
-                    curToken = '';
-                }
-                else if (token.value === VFS_Keyword.Minus) { // 处理负号-
-                    expressItem = this.parseOperate(astStack.concat(), curToken);
-                    astStack.length = 0;
-                    curToken = '';
-                    isMinus = true;
-                }
-                astStack.push(token);
-                curToken += token.type.toString();
-                curIsOption = true;
-                if (isMinus) {
-                    curIsOption = false;
-                    isMinus = false;
+            if (token.type === TokenType.Bracket &&
+                (!lastToken ||
+                    (lastToken.type !== TokenType.ArrayFunction
+                        && lastToken.type !== TokenType.Random))) { // 表达式中除了运算符括号，还有数组操作的括号和随机值的括号，需要排除
+                if (token.value && Array.isArray(token.value)) {
+                    var subExpressTokens = token.value;
+                    var subExpress = this.parseExpressType(subExpressTokens);
+                    if (subExpress.length) {
+                        if (curToken && curIsOption) {
+                            expressItem = this.parseOperate(astStack.concat(), curToken);
+                            astStack.length = 0;
+                            curToken = '';
+                            curIsOption = false;
+                            if (expressItem) {
+                                express.push(expressItem);
+                                expressItem = undefined;
+                            }
+                        }
+                        express.push([5, '(']);
+                        for (var j = 0, jlen = subExpress.length; j < jlen; j++) {
+                            express.push(subExpress[j]);
+                        }
+                        express.push([5, ')']);
+                    }
                 }
             }
             else {
-                if (curIsOption) {
-                    expressItem = this.parseOperate(astStack.concat(), curToken);
-                    astStack.length = 0;
-                    curToken = '';
+                if (token.type === TokenType.Option ||
+                    token.type === TokenType.Slash ||
+                    token.type === TokenType.Equal) {
+                    var isMinus = false;
+                    if (!curIsOption) {
+                        expressItem = this.parseExpressItem(astStack.concat(), curToken);
+                        astStack.length = 0;
+                        curToken = '';
+                    }
+                    else if (token.value === VFS_Keyword.Exclamation) { // 处理！
+                        expressItem = this.parseOperate(astStack.concat(), curToken);
+                        astStack.length = 0;
+                        curToken = '';
+                    }
+                    else if (token.value === VFS_Keyword.Minus) { // 处理负号-
+                        expressItem = this.parseOperate(astStack.concat(), curToken);
+                        astStack.length = 0;
+                        curToken = '';
+                        isMinus = true;
+                    }
+                    astStack.push(token);
+                    curToken += token.type.toString();
+                    curIsOption = true;
+                    if (isMinus) {
+                        curIsOption = false;
+                        isMinus = false;
+                    }
                 }
-                astStack.push(token);
-                curToken += token.type.toString();
-                curIsOption = false;
+                else {
+                    if (curIsOption) {
+                        expressItem = this.parseOperate(astStack.concat(), curToken);
+                        astStack.length = 0;
+                        curToken = '';
+                    }
+                    astStack.push(token);
+                    curToken += token.type.toString();
+                    curIsOption = false;
+                }
+                if (expressItem) {
+                    express.push(expressItem);
+                    expressItem = undefined;
+                }
             }
-            if (expressItem) {
-                express.push(expressItem);
-                expressItem = undefined;
-            }
+            lastToken = token;
         }
         if (!curIsOption && astStack.length > 0) {
             expressItem = this.parseExpressItem(astStack.concat(), curToken);
@@ -1490,6 +1521,7 @@ var VFScriptParser = /** @class */ (function () {
         // this.log('ValueToken', ValueToken);
         // this.log('VariableToken', VariableToken);
         // this.log('regArrayLength', ArrayLengthToken);
+        this.log('pares express start:', tokens, tokenType);
         // 先长后短
         if (regArrayIndex.test(tokenType)) {
             this.log('parse array index');
@@ -1523,7 +1555,7 @@ var VFScriptParser = /** @class */ (function () {
             this.log('parse const');
             return this.parseConst(tokens);
         }
-        this.log('pares express:', tokens, tokenType);
+        this.log('pares express fail:', tokens, tokenType);
         if (express.length > 0) {
             return express;
         }

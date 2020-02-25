@@ -184,7 +184,8 @@ const ArrayIndexToken: string = '(' + VariableToken + ArrayValueToken + '(' + To
 const ArrayFunctionToken: string = '(' + VariableToken + TokenType.Dot + TokenType.ArrayFunction + TokenType.Bracket + ')';
 const ArrayLengthToken: string = '(' + VariableToken + TokenType.Dot + TokenType.Length + ')';
 const ExpressItemToken: string = '(' + VariableToken + '|' + PropertyToken + '|' + ObjectToken + '|' +
-                                       ArrayIndexToken + '|' + ArrayFunctionToken +  '|' + ArrayLengthToken + ')';
+                                       ArrayIndexToken + '|' + ArrayFunctionToken +  '|' + ArrayLengthToken + '|' +
+                                       TokenType.Bracket + '|' + VfComponentToken + ')';
 const ArrayRandomToken: string = '(' + VariableToken + TokenType.Dot + TokenType.Random + TokenType.Bracket + ')';
 export default class VFScriptParser {
 
@@ -1427,6 +1428,7 @@ export default class VFScriptParser {
         const express: ExpressType = [];
 
         const astStack: IToken[] = [];
+        let lastToken: IToken | undefined;
         let curToken: string = '';
         let expressItem: ExpressItem|undefined;
         let curIsOption: boolean = false;
@@ -1436,48 +1438,75 @@ export default class VFScriptParser {
         }
         for (let i: number = 0, len: number = tokens.length; i < len; i++) {
             const token = tokens[i];
-
-            if (token.type === TokenType.Option ||
-                token.type === TokenType.Slash  ||
-                token.type === TokenType.Equal) {
-                let isMinus: boolean = false;
-                if (!curIsOption) {
-
-                    expressItem = this.parseExpressItem(astStack.concat(), curToken);
-                    astStack.length = 0;
-                    curToken = '';
-                } else if (token.value === VFS_Keyword.Exclamation) { // 处理！
-                    expressItem = this.parseOperate(astStack.concat(), curToken);
-                    astStack.length = 0;
-                    curToken = '';
-                } else if (token.value === VFS_Keyword.Minus) { // 处理负号-
-                    expressItem = this.parseOperate(astStack.concat(), curToken);
-                    astStack.length = 0;
-                    curToken = '';
-                    isMinus = true;
-                }
-                astStack.push(token);
-                curToken += token.type.toString();
-                curIsOption = true;
-                if (isMinus) {
-                    curIsOption = false;
-                    isMinus = false;
+            if (token.type === TokenType.Bracket &&
+                    (!lastToken ||
+                     (lastToken.type !== TokenType.ArrayFunction
+                      && lastToken.type !== TokenType.Random))) { // 表达式中除了运算符括号，还有数组操作的括号和随机值的括号，需要排除
+                if (token.value && Array.isArray(token.value)) {
+                    const subExpressTokens: IToken[] = token.value;
+                    const subExpress = this.parseExpressType(subExpressTokens);
+                    if (subExpress.length) {
+                        if (curToken && curIsOption) {
+                            expressItem = this.parseOperate(astStack.concat(), curToken);
+                            astStack.length = 0;
+                            curToken = '';
+                            curIsOption = false;
+                            if (expressItem) {
+                                express.push(expressItem);
+                                expressItem = undefined;
+                            }
+                        }
+                        express.push([5, '(']);
+                        for (let j: number = 0, jlen: number = subExpress.length; j < jlen; j++) {
+                            express.push(subExpress[j]);
+                        }
+                        express.push([5, ')']);
+                    }
                 }
             } else {
-                if (curIsOption) {
+                if (token.type === TokenType.Option ||
+                    token.type === TokenType.Slash  ||
+                    token.type === TokenType.Equal) {
+                    let isMinus: boolean = false;
+                    if (!curIsOption) {
 
-                    expressItem = this.parseOperate(astStack.concat(), curToken);
-                    astStack.length = 0;
-                    curToken = '';
+                        expressItem = this.parseExpressItem(astStack.concat(), curToken);
+                        astStack.length = 0;
+                        curToken = '';
+                    } else if (token.value === VFS_Keyword.Exclamation) { // 处理！
+                        expressItem = this.parseOperate(astStack.concat(), curToken);
+                        astStack.length = 0;
+                        curToken = '';
+                    } else if (token.value === VFS_Keyword.Minus) { // 处理负号-
+                        expressItem = this.parseOperate(astStack.concat(), curToken);
+                        astStack.length = 0;
+                        curToken = '';
+                        isMinus = true;
+                    }
+                    astStack.push(token);
+                    curToken += token.type.toString();
+                    curIsOption = true;
+                    if (isMinus) {
+                        curIsOption = false;
+                        isMinus = false;
+                    }
+                } else {
+                    if (curIsOption) {
+
+                        expressItem = this.parseOperate(astStack.concat(), curToken);
+                        astStack.length = 0;
+                        curToken = '';
+                    }
+                    astStack.push(token);
+                    curToken += token.type.toString();
+                    curIsOption = false;
                 }
-                astStack.push(token);
-                curToken += token.type.toString();
-                curIsOption = false;
+                if (expressItem) {
+                    express.push(expressItem);
+                    expressItem = undefined;
+                }
             }
-            if (expressItem) {
-                express.push(expressItem);
-                expressItem = undefined;
-            }
+            lastToken = token;
         }
         if (!curIsOption && astStack.length > 0) {
             expressItem = this.parseExpressItem(astStack.concat(), curToken);
@@ -1551,7 +1580,7 @@ export default class VFScriptParser {
         // this.log('ValueToken', ValueToken);
         // this.log('VariableToken', VariableToken);
         // this.log('regArrayLength', ArrayLengthToken);
-
+        this.log('pares express start:', tokens, tokenType);
         // 先长后短
         if (regArrayIndex.test(tokenType)) {
             this.log('parse array index');
@@ -1578,7 +1607,7 @@ export default class VFScriptParser {
             this.log('parse const');
             return this.parseConst(tokens);
         }
-        this.log('pares express:', tokens, tokenType);
+        this.log('pares express fail:', tokens, tokenType);
 
         if (express.length > 0) {
             return express;
