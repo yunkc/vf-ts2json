@@ -41,7 +41,7 @@
             var errorLoadCount = 0;
             var option = {
                 container: document.getElementById("vf-container"),
-                engineVersion: "0.0.27", //引擎使用的版本
+                engineVersion: "0.0.39", //引擎使用的版本
                 fixVersion:'1',
                 bgcolor: '0xffffff',
                 src: './vf-json/index.json', //设置模板数据源地址
@@ -52,10 +52,24 @@
                 // scaleMode: 'showAll'//不填写，根据配置数据读取 'showAll', 'noScale','cover','contain'
                 vfvars: {
                     useNativeAudio: true, //业务线动态设置,是否使用原生播放
-                    cdns:[//必选,引擎库的cdn地址,正式环境需要设置,测试环境设置''
-                        isProd? 'https://s.vipkidstatic.com/vf/engine/':"",
-                        isProd? 'https://s.vipkidresource.com/vf/engine/':"",
-                    ]
+                    cdns:{ //必选,引擎库的cdn地址,正式环境需要设置,测试环境设置''
+                        default:[
+                            isProd? 'https://s.vipkidstatic.com/':"",
+                            isProd? 'https://s.vipkidresource.com/':"",
+                        ],
+                        image:[
+                            isProd? 'https://img.vipkidstatic.com/':"",
+                            isProd? 'https://img.vipkidresource.com/':"",
+                        ],
+                        media:[
+                            isProd? 'https://media.vipkidstatic.com/':"",
+                            isProd? 'https://media.vipkidresource.com/':"",
+                        ],
+                        wx:[
+                            isProd? 'https://wx.vipkidstatic.com/':"",
+                            isProd? 'https://wx.vipkidresource.com/':"",
+                        ],
+                    }
                 },
                 plugs: [
                     //{ id: "BoardDrawPlug", role: 1 }, //内置插件,开启画板 role 1老师 2学生
@@ -95,9 +109,10 @@
             }
 
             function loadScript(index){
+                var cdn = option.vfvars.cdns.default;
                 var s = document.createElement('script');
                 s.async = false;
-                s.src = option.vfvars.cdns[index] + './vf-engine-v' + option.engineVersion + '/vf.js?v' + option.fixVersion;
+                s.src = cdn[index] + '/vf/engine/vf-engine-v' + option.engineVersion + '/vf.js?v=' + option.fixVersion;
                 s.addEventListener('load', loadComplete, false);
                 s.addEventListener('error', loadError, false);
                 document.body.appendChild(s);
