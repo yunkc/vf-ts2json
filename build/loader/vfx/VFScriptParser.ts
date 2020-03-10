@@ -1,14 +1,21 @@
 import { ActionType, IAction, VariableType, IActionDefineVariable, IActionFunction,
-         IActionIFPart, ExpressItem, ExpressType, ExpressItemType, IActionExpress,
-         IActionAddEventListener, IActionJump, IActionPlaySound, IActionCallFunction,
-         IActionPlayAnimation,
-         IActionEmitEvent,
-         IActionFor} from './IVFData';
+    IActionIFPart, ExpressItem, ExpressType, ExpressItemType, IActionExpress,
+    IActionAddEventListener, IActionJump, IActionPlaySound, IActionCallFunction,
+    IActionPlayAnimation,
+    IActionEmitEvent,
+    IActionFor,
+    IActionInterval} from './IVFData';
 
 
 interface IToken {
     type: TokenType;
     value?: string | IToken[];
+}
+
+enum ParamType {
+    ExpressItem,
+    Closure,
+    CallbackFunction,
 }
 
 enum TokenType {
@@ -63,9 +70,9 @@ enum VFS_Keyword {
     JumpToScene = 'jumpToScene',
     JumpToNextScene = 'jumpToNextScene',
     JumpToPrevScene = 'jumpToPrevScene',
-    playAnimation = 'playAnimation',
-    gotoPlay = 'gotoPlay',
-    gotoStop = 'gotoStop',
+    PlayAnimation = 'playAnimation',
+    GotoPlay = 'gotoPlay',
+    GotoStop = 'gotoStop',
     Emit = 'emit',
     True = 'true',
     False = 'false',
@@ -85,6 +92,10 @@ enum VFS_Keyword {
     For = 'for',
     In = 'in',
     Break = 'break',
+    Wait = 'wait',
+    SetTimeout = 'setTimeout',
+    SetInterval = 'setInterval',
+    SetEnterFrame = 'setEnterFrame',
     // 下面为单字符关键词
     Enter = '\n',
     Space = ' ',
@@ -118,35 +129,35 @@ enum VFS_Keyword {
     // 单字符关键字需要加到下面的数组里做分词
 }
 const VFS_Keyword_Symbol: string[] = [VFS_Keyword.Enter,
-                            VFS_Keyword.Space,
-                            VFS_Keyword.At,
-                            VFS_Keyword.Dollar,
-                            VFS_Keyword.Sharp,
-                            VFS_Keyword.Equal,
-                            VFS_Keyword.Dot,
-                            VFS_Keyword.Comma,
-                            VFS_Keyword.Add,
-                            VFS_Keyword.Minus,
-                            VFS_Keyword.Star,
-                            VFS_Keyword.Slash,
-                            VFS_Keyword.Exclamation,
-                            VFS_Keyword.Vertical,
-                            VFS_Keyword.And,
-                            VFS_Keyword.Backslash,
-                            VFS_Keyword.Percent,
-                            VFS_Keyword.More,
-                            VFS_Keyword.Less,
-                            VFS_Keyword.BracketL,
-                            VFS_Keyword.BracketR,
-                            VFS_Keyword.SquareBracketL,
-                            VFS_Keyword.SquareBracketR,
-                            VFS_Keyword.BlockL,
-                            VFS_Keyword.BlockR,
-                            VFS_Keyword.SingleQuot,
-                            VFS_Keyword.DoubleQuot,
-                            VFS_Keyword.Semicolon,
-                            VFS_Keyword.Colon,
-                        ];
+    VFS_Keyword.Space,
+    VFS_Keyword.At,
+    VFS_Keyword.Dollar,
+    VFS_Keyword.Sharp,
+    VFS_Keyword.Equal,
+    VFS_Keyword.Dot,
+    VFS_Keyword.Comma,
+    VFS_Keyword.Add,
+    VFS_Keyword.Minus,
+    VFS_Keyword.Star,
+    VFS_Keyword.Slash,
+    VFS_Keyword.Exclamation,
+    VFS_Keyword.Vertical,
+    VFS_Keyword.And,
+    VFS_Keyword.Backslash,
+    VFS_Keyword.Percent,
+    VFS_Keyword.More,
+    VFS_Keyword.Less,
+    VFS_Keyword.BracketL,
+    VFS_Keyword.BracketR,
+    VFS_Keyword.SquareBracketL,
+    VFS_Keyword.SquareBracketR,
+    VFS_Keyword.BlockL,
+    VFS_Keyword.BlockR,
+    VFS_Keyword.SingleQuot,
+    VFS_Keyword.DoubleQuot,
+    VFS_Keyword.Semicolon,
+    VFS_Keyword.Colon,
+];
 enum RegType {
     DefineVariable,
     DefineFunction,
@@ -162,34 +173,34 @@ enum RegType {
 }
 const TokenALL = '[0-9a-zA-Z]';
 const VfComponentToken: string = '(' + '(' + TokenType.This + '|' + TokenType.Global + ')' + '(' + TokenType.Child +
-                                      '(' + TokenType.Number + '|' + TokenType.String + ')' + ')*)';
+    '(' + TokenType.Number + '|' + TokenType.String + ')' + ')*)';
 const VariableToken: string = '(' + '(' + VfComponentToken + '|' + TokenType.Global + ')' + '?' +
-                                '(' + TokenType.Variable + '(' + TokenType.Number + '|' + TokenType.String + '))+)';
+    '(' + TokenType.Variable + '(' + TokenType.Number + '|' + TokenType.String + '))+)';
 const PropertyToken: string = '(' + '(' + VfComponentToken + ')' +
-                                '(' + TokenType.Dot + TokenType.String + ')+)';
+    '(' + TokenType.Dot + TokenType.String + ')+)';
 const ObjectToken: string = '(' + '(' + VariableToken + ')' +
-                                '(' + TokenType.Dot + TokenType.String + ')+)';
+    '(' + TokenType.Dot + TokenType.String + ')+)';
 const StringValueToken: string = '((' + TokenType.Quotation + TokenALL + TokenType.Quotation + ')' + '|' +
-                                    '(' + TokenType.DoubleQuotation + TokenALL + TokenType.DoubleQuotation + '))';
+    '(' + TokenType.DoubleQuotation + TokenALL + TokenType.DoubleQuotation + '))';
 const ArrayValueToken: string = '(' + TokenType.SquareBracket + ')+';
 const NumberToken: string = '(' + TokenType.Number + '|' +
-                                 '(' + TokenType.Option + TokenType.Number + ')' + '|' +
-                                 '(' + TokenType.Option + TokenType.Number + TokenType.Dot + TokenType.Number + ')' + '|' +
-                                 '(' + TokenType.Number + TokenType.Dot + TokenType.Number + ')' + ')';
+    '(' + TokenType.Option + TokenType.Number + ')' + '|' +
+    '(' + TokenType.Option + TokenType.Number + TokenType.Dot + TokenType.Number + ')' + '|' +
+    '(' + TokenType.Number + TokenType.Dot + TokenType.Number + ')' + ')';
 const ValueToken: string = '(' + StringValueToken + '|' + NumberToken + '|' +
-                                 TokenType.Boolean + '|' + ArrayValueToken + '|' + TokenType.Block + ')';
+    TokenType.Boolean + '|' + ArrayValueToken + '|' + TokenType.Block + ')';
 
 const OperateToken: string = '(' + TokenType.Option + '|' + TokenType.Equal + '|' + TokenType.Slash + ')';
 const ArrayIndexToken: string = '(' + VariableToken + ArrayValueToken + '(' + TokenType.Dot + TokenType.String + ')*)';
 const ArrayFunctionToken: string = '(' + VariableToken + TokenType.Dot + TokenType.ArrayFunction + TokenType.Bracket + ')';
 const ArrayLengthToken: string = '(' + VariableToken + TokenType.Dot + TokenType.Length + ')';
 const ExpressItemToken: string = '(' + VariableToken + '|' + PropertyToken + '|' + ObjectToken + '|' +
-                                       ArrayIndexToken + '|' + ArrayFunctionToken +  '|' + ArrayLengthToken + '|' +
-                                       TokenType.Bracket + '|' + VfComponentToken + ')';
+    ArrayIndexToken + '|' + ArrayFunctionToken +  '|' + ArrayLengthToken + '|' +
+    TokenType.Bracket + '|' + VfComponentToken + ')';
 const ArrayRandomToken: string = '(' + VariableToken + TokenType.Dot + TokenType.Random + TokenType.Bracket + ')';
 export default class VFScriptParser {
 
-    public debug: boolean = false;
+    public debug: boolean = true;
     public regNumber = /^\d+$/;
 
     public regDefineVariable = new RegExp(
@@ -220,10 +231,14 @@ export default class VFScriptParser {
     ); // /154/;
     public regExpress = new RegExp(
         '(' + ArrayFunctionToken + '|' +
-            '(' + '(' + ExpressItemToken + '|' + ValueToken + ')' +
-                  '(' + '(' + OperateToken + ')+' + '(' + ExpressItemToken + '|' + ValueToken + '))+)' +
+        '(' + '(' + ExpressItemToken + '|' + ValueToken + ')' +
+        '(' + '(' + OperateToken + ')+' + '(' + ExpressItemToken + '|' + ValueToken + '))+)' +
         ')',
     ); // /(13|17|6|7|8|9|2|3)*(2|3)(13|17|6|7|8|9|2|3)*/;
+
+    public regExpressItem = new RegExp(
+        ExpressItemToken,
+    );
 
     public regComment = new RegExp(
         TokenType.Slash + TokenType.Slash +
@@ -472,9 +487,13 @@ export default class VFScriptParser {
                     case VFS_Keyword.JumpToScene:
                     case VFS_Keyword.JumpToNextScene:
                     case VFS_Keyword.JumpToPrevScene:
-                    case VFS_Keyword.playAnimation:
-                    case VFS_Keyword.gotoPlay:
-                    case VFS_Keyword.gotoStop:
+                    case VFS_Keyword.PlayAnimation:
+                    case VFS_Keyword.GotoPlay:
+                    case VFS_Keyword.GotoStop:
+                    case VFS_Keyword.Wait:
+                    case VFS_Keyword.SetTimeout:
+                    case VFS_Keyword.SetInterval:
+                    case VFS_Keyword.SetEnterFrame:
                         token.type = TokenType.VFFunction;
                         break;
                     case VFS_Keyword.Add:
@@ -598,7 +617,13 @@ export default class VFScriptParser {
         } else if (this.regComment.test(curToken)) {
             action = this.parseComment(astStack.concat()); // 解析注释
         } else if (this.regDefineVariable.test(curToken)) { // 解析全局变量
-            action = this.parseDefineVariable(astStack.concat());
+            const actions = this.parseDefineVariable(astStack.concat());
+            if (actions.length > 0) {
+                action = actions[0];
+                if (actions.length > 1) {
+                    this.warn('define variable must be a simple const value');
+                }
+            }
         }
         return action;
     }
@@ -628,7 +653,7 @@ export default class VFScriptParser {
         const ast: IAction[] = [];
         const astStack: IToken[] = [];
         let curToken: string = '';
-        let action: IAction|undefined;
+        let actions: IAction[] | undefined;
         let tokens: IToken[] = [];
         const tokenDefineFunction = TokenType.Function + TokenType.String + TokenType.Bracket + TokenType.Block;
         if (blockToken.type === TokenType.Block) {
@@ -642,38 +667,41 @@ export default class VFScriptParser {
             const token = tokens[i];
 
             if (token.type === TokenType.Semicolon) {
-                action = this.parseAction(astStack.concat(), curToken);
+                actions = this.parseAction(astStack.concat(), curToken);
                 astStack.length = 0;
                 curToken = '';
             } else {
                 astStack.push(token);
                 curToken += token.type.toString();
                 if (curToken === tokenDefineFunction) { // 定义方法 防止定义方法后面不加分号
-                    action = this.parseAction(astStack.concat(), curToken);
+                    actions = this.parseAction(astStack.concat(), curToken);
                     astStack.length = 0;
                     curToken = '';
                 } else if (this.regVFFunction.test(curToken)) { // 防止xx.on('',()=>{}) 后面不加分号
-                    action = this.parseAction(astStack.concat(), curToken);
+                    actions = this.parseAction(astStack.concat(), curToken);
                     astStack.length = 0;
                     curToken = '';
                 }
             }
 
             if (i === len - 1 && astStack.length > 0) {
-                action = this.parseAction(astStack.concat(), curToken);
+                actions = this.parseAction(astStack.concat(), curToken);
                 astStack.length = 0;
                 curToken = '';
             }
-            if (action) {
-                ast.push(action);
-                action = undefined;
+            if (actions && actions.length) {
+                for (let j: number = 0 , jlen: number = actions.length; j < jlen; j++) {
+                    ast.push(actions[j]);
+                }
+                actions = undefined;
             }
         }
         return ast;
     }
-    private parseAction(tokens: IToken[], tokenType: string): IAction|undefined {
+    private parseAction(tokens: IToken[], tokenType: string): IAction[] {
+        const actions: IAction[] = [];
         if (tokens.length === 0) {
-            return undefined;
+            return actions;
         }
         this.log('parse action:', tokenType);
         for (let i: number = 0, len: number = this.actionRegs.length; i < len; i++) {
@@ -682,7 +710,13 @@ export default class VFScriptParser {
                 let action: IAction|undefined;
                 switch (i) {
                     case RegType.DefineVariable:
-                        action = this.parseDefineVariable(tokens);
+                        const defineActions = this.parseDefineVariable(tokens);
+                        if (defineActions.length === 2) {
+                            actions.push(defineActions[0]);
+                            action = defineActions[1];
+                        } else if (defineActions.length === 1) {
+                            action = defineActions[0];
+                        }
                         break;
                     case RegType.DefineFunction:
                         action = this.parseDefineFunction(tokens);
@@ -717,19 +751,22 @@ export default class VFScriptParser {
                     default:
                         break;
                 }
+                if (action) {
+                    actions.push(action);
+                }
                 this.log('parse action result:', action);
-                return action;
+                return actions;
             }
         }
         this.warn('parse action result: undefined', tokens);
-        return undefined;
+        return actions;
     }
     //////////////////////// 以下为解析实际的action每个都与一个ActionType对应////////////
-    private parseDefineVariable(tokens: IToken[]): IAction {
+    private parseDefineVariable(tokens: IToken[]): IAction[] {
         let idIndex = 2;
         let valueIndex = 4;
         let isGlobal = false;
-        if (tokens.length === 6) {
+        if (tokens.length >= 6 && tokens[1].type === TokenType.Global) {
             idIndex = 3;
             valueIndex = 5;
             isGlobal = true;
@@ -743,24 +780,47 @@ export default class VFScriptParser {
         if (isGlobal) {
             defineVariableTask.target = [-1] as any;
         }
-        if (tokens[valueIndex].type === TokenType.Number || tokens[valueIndex].type === TokenType.String) {
-            defineVariableTask.variableType = VariableType.NUMBER;
-            defineVariableTask.value = this.parseNumberFromTokens(tokens, valueIndex);
-        } else if (tokens[valueIndex].type === TokenType.Quotation ||
-                   tokens[valueIndex].type === TokenType.DoubleQuotation) {
-            defineVariableTask.variableType = VariableType.STRING;
-            defineVariableTask.value = this.parseStringFromTokens(tokens, valueIndex);
-        } else if (tokens[valueIndex].type === TokenType.Boolean) {
-            defineVariableTask.variableType = VariableType.BOOLEAN;
-            defineVariableTask.value = tokens[valueIndex].value === VFS_Keyword.True ? true : false;
-        } else if (tokens[valueIndex].type === TokenType.Block) {
-            defineVariableTask.variableType = VariableType.OBJECT;
-            defineVariableTask.value = this.parseObjectFromBlock(tokens[valueIndex]);
-        } else if (tokens[valueIndex].type === TokenType.SquareBracket) {
-            defineVariableTask.variableType = VariableType.ARRAY;
-            defineVariableTask.value = this.parseArrayFromSquare(tokens[valueIndex]);
+        const sub = tokens.concat();
+        for (let i = 0, len = valueIndex; i < len; i++) {
+            sub.shift();
         }
-        return defineVariableTask;
+        const subExpress = this.parseExpressType(sub);
+        if (subExpress.length === 1 && subExpress[0][0] === 0) {
+            if (tokens[valueIndex].type === TokenType.Number || tokens[valueIndex].type === TokenType.String) {
+                defineVariableTask.variableType = VariableType.NUMBER;
+                defineVariableTask.value = this.parseNumberFromTokens(tokens, valueIndex);
+            } else if (tokens[valueIndex].type === TokenType.Quotation ||
+                tokens[valueIndex].type === TokenType.DoubleQuotation) {
+                defineVariableTask.variableType = VariableType.STRING;
+                defineVariableTask.value = this.parseStringFromTokens(tokens, valueIndex);
+            } else if (tokens[valueIndex].type === TokenType.Boolean) {
+                defineVariableTask.variableType = VariableType.BOOLEAN;
+                defineVariableTask.value = tokens[valueIndex].value === VFS_Keyword.True ? true : false;
+            } else if (tokens[valueIndex].type === TokenType.Block) {
+                defineVariableTask.variableType = VariableType.OBJECT;
+                defineVariableTask.value = this.parseObjectFromBlock(tokens[valueIndex]);
+            } else if (tokens[valueIndex].type === TokenType.SquareBracket) {
+                defineVariableTask.variableType = VariableType.ARRAY;
+                defineVariableTask.value = this.parseArrayFromSquare(tokens[valueIndex]);
+            }
+        } else {
+            defineVariableTask.variableType = VariableType.OBJECT;
+            if (subExpress.length > 0) {
+                subExpress.unshift([5, '=']);
+                if (isGlobal) {
+                    subExpress.unshift([1, [-1], defineVariableTask.varId]);
+                } else {
+                    subExpress.unshift([1, [], defineVariableTask.varId]);
+                }
+
+                const expressTask: IActionExpress = {
+                    type: ActionType.Express,
+                    express: subExpress,
+                };
+                return [defineVariableTask, expressTask];
+            }
+        }
+        return [defineVariableTask];
     }
 
     private parseDefineFunction(tokens: IToken[]): IAction {
@@ -791,7 +851,7 @@ export default class VFScriptParser {
             value: '',
         };
         if (tokens[1].value && (tokens[1].value[0] === TokenType.Quotation ||
-                               tokens[1].value[0] === TokenType.DoubleQuotation)) {
+            tokens[1].value[0] === TokenType.DoubleQuotation)) {
             printTask.value = this.parseStringFromBracket(tokens[1]);
         } else {
             printTask.value  = this.parseExpressItemFromBracket(tokens[1]);
@@ -902,14 +962,26 @@ export default class VFScriptParser {
                 case VFS_Keyword.JumpToPrevScene:
                     vfFunction = this.parseJumpToPrevScene(tokens);
                     break;
-                case VFS_Keyword.playAnimation:
+                case VFS_Keyword.PlayAnimation:
                     vfFunction = this.parsePlayAnimation(tokens);
                     break;
-                case VFS_Keyword.gotoPlay:
+                case VFS_Keyword.GotoPlay:
                     vfFunction = this.parseGotoPlay(tokens);
                     break;
-                case VFS_Keyword.gotoStop:
+                case VFS_Keyword.GotoStop:
                     vfFunction = this.parseGotoStop(tokens);
+                    break;
+                case VFS_Keyword.Wait:
+                    vfFunction = this.parseWait(tokens);
+                    break;
+                case VFS_Keyword.SetTimeout:
+                    vfFunction = this.parseSetTimeout(tokens);
+                    break;
+                case VFS_Keyword.SetInterval:
+                    vfFunction = this.parseSetInterval(tokens);
+                    break;
+                case VFS_Keyword.SetEnterFrame:
+                    vfFunction = this.parseSetEnterFrame(tokens);
                     break;
                 default:
                     break;
@@ -918,26 +990,34 @@ export default class VFScriptParser {
         this.log('parse vf function after:', vfFunction);
         return vfFunction;
     }
-    private parseAddListener(tokens: IToken[]): IAction | undefined {
-        const componentTokens: IToken[] = [];
-        let paramsToken: IToken | undefined;
 
-        for (let i: number = 0, len: number = tokens.length; i < len; i++) {
-            if (tokens[i].type !== TokenType.Dot) {
+    private parseVFFunctionTarget(tokens: IToken[]): ExpressItem | string[] | undefined {
+        const componentTokens: IToken[] = [];
+        for (let i: number = 0, len: number = tokens.length - 2; i < len; i++) {
+            if (tokens[i + 2].type !== TokenType.Bracket) {
                 componentTokens.push(tokens[i]);
             } else {
                 break;
             }
         }
+        if (componentTokens.length > 0) {
+            const target = this.parseComponentOrExpressItem(componentTokens);
+            return target;
+        }
+    }
+
+    private parseAddListener(tokens: IToken[]): IAction | undefined {
+
+        let paramsToken: IToken | undefined;
+        const target = this.parseVFFunctionTarget(tokens);
         for (let i: number = tokens.length - 1; i >= 0; i--) {
             if (tokens[i].type === TokenType.Bracket) {
                 paramsToken = tokens[i];
                 break;
             }
         }
-        if (componentTokens.length > 0 && paramsToken) {
+        if (target && paramsToken) {
 
-            const target = this.parseComponent(componentTokens);
             const eventParam = this.parseEventParamFromBracket(paramsToken);
             if (eventParam.ok) {
                 const addListenerTask: IActionAddEventListener = {
@@ -945,10 +1025,10 @@ export default class VFScriptParser {
                     event: eventParam.eventName,
                     target,
                 };
-                if (componentTokens.length) {
-                    if (componentTokens[0].type === TokenType.Global) {
+                if (tokens.length) {
+                    if (tokens[0].type === TokenType.Global) {
                         addListenerTask.global = true;
-                    } else if (componentTokens[0].type === TokenType.System) {
+                    } else if (tokens[0].type === TokenType.System) {
                         addListenerTask.system = true;
                     }
                 }
@@ -965,36 +1045,29 @@ export default class VFScriptParser {
     }
 
     private parseRemoveListener(tokens: IToken[]): IAction | undefined {
-        const componentTokens: IToken[] = [];
-        let paramsToken: IToken | undefined;
 
-        for (let i: number = 0, len: number = tokens.length; i < len; i++) {
-            if (tokens[i].type !== TokenType.Dot) {
-                componentTokens.push(tokens[i]);
-            } else {
-                break;
-            }
-        }
+        let paramsToken: IToken | undefined;
+        const target = this.parseVFFunctionTarget(tokens);
+
         for (let i: number = tokens.length - 1; i >= 0; i--) {
             if (tokens[i].type === TokenType.Bracket) {
                 paramsToken = tokens[i];
                 break;
             }
         }
-        if (componentTokens.length > 0 && paramsToken) {
+        if (target && paramsToken) {
 
-            const target = this.parseComponent(componentTokens);
             const eventParam = this.parseEventParamFromBracket(paramsToken);
             if (eventParam.eventName) {
                 const addListenerTask: IActionAddEventListener = {
-                    type: ActionType.AddEventListener,
+                    type: ActionType.RemoveEventListener,
                     event: eventParam.eventName,
                     target,
                 };
-                if (componentTokens.length) {
-                    if (componentTokens[0].type === TokenType.Global) {
+                if (tokens.length) {
+                    if (tokens[0].type === TokenType.Global) {
                         addListenerTask.global = true;
-                    } else if (componentTokens[0].type === TokenType.System) {
+                    } else if (tokens[0].type === TokenType.System) {
                         addListenerTask.system = true;
                     }
                 }
@@ -1005,25 +1078,17 @@ export default class VFScriptParser {
     }
 
     private parseEmit(tokens: IToken[]): IAction | undefined {
-        const componentTokens: IToken[] = [];
         let paramsToken: IToken | undefined;
 
-        for (let i: number = 0, len: number = tokens.length; i < len; i++) {
-            if (tokens[i].type !== TokenType.Dot) {
-                componentTokens.push(tokens[i]);
-            } else {
-                break;
-            }
-        }
+        const target = this.parseVFFunctionTarget(tokens);
+
         for (let i: number = tokens.length - 1; i >= 0; i--) {
             if (tokens[i].type === TokenType.Bracket) {
                 paramsToken = tokens[i];
                 break;
             }
         }
-        if (componentTokens.length > 0 && paramsToken) {
-
-            const target = this.parseComponent(componentTokens);
+        if (target && paramsToken) {
             const eventParam = this.parseExpressTypeFromBracket(paramsToken);
 
             const emitTask: IActionEmitEvent = {
@@ -1031,10 +1096,10 @@ export default class VFScriptParser {
                 event: '',
                 target,
             };
-            if (componentTokens.length) {
-                if (componentTokens[0].type === TokenType.Global) {
+            if (tokens.length) {
+                if (tokens[0].type === TokenType.Global) {
                     emitTask.global = true;
-                } else if (componentTokens[0].type === TokenType.System) {
+                } else if (tokens[0].type === TokenType.System) {
                     emitTask.system = true;
                 }
             }
@@ -1045,8 +1110,6 @@ export default class VFScriptParser {
                 }
             }
             return emitTask;
-
-
         }
     }
 
@@ -1178,23 +1241,25 @@ export default class VFScriptParser {
         const funTokens: IToken[] = [];
         let i: number = 0;
         let len: number = 0;
-        for (i = 0, len = tokens.length; i < len; i++) {
-            if (tokens[i].type !== TokenType.Dot) {
+        for (i = 0, len = tokens.length - 2; i < len; i++) {
+            if (tokens[i + 2].type !== TokenType.Bracket) {
                 componentTokens.push(tokens[i]);
             } else {
                 break;
             }
         }
+        len = tokens.length;
         for (i++ ; i < len; i++) {
             funTokens.push(tokens[i]);
         }
+
         if (componentTokens.length > 0 && funTokens.length > 0) {
 
-            const target = this.parseComponent(componentTokens);
+            const target = this.parseComponentOrExpressItem(componentTokens);
             cusFunction.target = target;
             if (funTokens.length >= 2 &&
-               (funTokens[0].type === TokenType.String  || funTokens[0].type === TokenType.VFFunction) &&
-               funTokens[1].type === TokenType.Bracket)  {
+                (funTokens[0].type === TokenType.String  || funTokens[0].type === TokenType.VFFunction) &&
+                funTokens[1].type === TokenType.Bracket)  {
                 const funName: string = funTokens[0].value as string;
                 const funParam = this.parseFunctionParamFromBracket(funTokens[1]);
                 cusFunction.name = funName;
@@ -1225,7 +1290,7 @@ export default class VFScriptParser {
             } else if (tokens[i].type === TokenType.Global) {
                 target.push(-1);
             } else if (tokens[i].type === TokenType.String ||
-                        tokens[i].type === TokenType.Number) {
+                tokens[i].type === TokenType.Number) {
                 target.push(tokens[i].value);
             } else if (tokens[i].type === TokenType.Variable) {
                 break;
@@ -1239,7 +1304,7 @@ export default class VFScriptParser {
                 if (tokens[i].type === TokenType.Variable) {
                     continue;
                 } else if (tokens[i].type === TokenType.String ||
-                            tokens[i].type === TokenType.Number) {
+                    tokens[i].type === TokenType.Number) {
                     express.push(tokens[i].value);
                 } else if (tokens[i].type === TokenType.Dot) {
                     break;
@@ -1293,6 +1358,105 @@ export default class VFScriptParser {
         }
         return undefined;
     }
+    private parseWait(tokens: IToken[]): IAction | undefined {
+        const params = this.parseFunctionParamFromBracket(tokens[1]);
+        if (params.length === 0) {
+            return;
+        }
+        const waitTask: IAction = {
+            type: ActionType.Wait,
+            value: params[0],
+        };
+        return waitTask;
+    }
+
+    private parseSetTimeout(tokens: IToken[]): IAction | undefined {
+        let paramsToken: IToken | undefined;
+
+        for (let i: number = tokens.length - 1; i >= 0; i--) {
+            if (tokens[i].type === TokenType.Bracket) {
+                paramsToken = tokens[i];
+                break;
+            }
+        }
+        if (paramsToken) {
+
+            const params = this.parseFunctionParamFromBracket2(paramsToken);
+            if (params && params.length >= 2) {
+                const setTimeoutAction: IAction = {
+                    type: ActionType.SetTimeout,
+                };
+                if (params[0].type === ParamType.ExpressItem) {
+                    setTimeoutAction.value = params[0].value;
+                }
+                if ( params[1].type === ParamType.Closure) {
+                    setTimeoutAction.execute = params[1].value;
+                }
+                if (setTimeoutAction.value && setTimeoutAction.execute) {
+                    return setTimeoutAction;
+                }
+            }
+        }
+    }
+
+    private parseSetInterval(tokens: IToken[]): IAction | undefined {
+        let paramsToken: IToken | undefined;
+
+        for (let i: number = tokens.length - 1; i >= 0; i--) {
+            if (tokens[i].type === TokenType.Bracket) {
+                paramsToken = tokens[i];
+                break;
+            }
+        }
+        if (paramsToken) {
+            const params = this.parseFunctionParamFromBracket2(paramsToken);
+            if (params && params.length >= 2) {
+                const setIntervalAction: IActionInterval = {
+                    type: ActionType.SetInterval,
+                };
+                if (params[0].type === ParamType.ExpressItem) {
+                    setIntervalAction.value = params[0].value;
+                }
+                if ( params[1].type === ParamType.Closure) {
+                    setIntervalAction.execute = params[1].value;
+                } else if (params[1].type === ParamType.ExpressItem) {
+                    setIntervalAction.times = params[1].value;
+                }
+                if (params.length >= 3 && params[2].type === ParamType.Closure) {
+                    setIntervalAction.execute = params[2].value;
+                }
+                if (setIntervalAction.value && setIntervalAction.execute) {
+                    return setIntervalAction;
+                }
+            }
+        }
+    }
+
+    private parseSetEnterFrame(tokens: IToken[]): IAction | undefined {
+        let paramsToken: IToken | undefined;
+
+        for (let i: number = tokens.length - 1; i >= 0; i--) {
+            if (tokens[i].type === TokenType.Bracket) {
+                paramsToken = tokens[i];
+                break;
+            }
+        }
+        if (paramsToken) {
+            const params = this.parseFunctionParamFromBracket2(paramsToken);
+            if (params && params.length >= 1) {
+                const setEnterFrameAction: IAction = {
+                    type: ActionType.EnterFrame,
+                };
+                if ( params[0].type === ParamType.Closure) {
+                    setEnterFrameAction.execute = params[0].value;
+                }
+                if (setEnterFrameAction.execute) {
+                    return setEnterFrameAction;
+                }
+            }
+        }
+    }
+
     //////////////////////// 以上为解析实际的action每个都与一个ActionType对应////////////
     private parseNumberFromTokens(tokens: IToken[], start: number): number {
         let numStr: string = '';
@@ -1439,9 +1603,9 @@ export default class VFScriptParser {
         for (let i: number = 0, len: number = tokens.length; i < len; i++) {
             const token = tokens[i];
             if (token.type === TokenType.Bracket &&
-                    (!lastToken ||
-                     (lastToken.type !== TokenType.ArrayFunction
-                      && lastToken.type !== TokenType.Random))) { // 表达式中除了运算符括号，还有数组操作的括号和随机值的括号，需要排除
+                (!lastToken ||
+                    (lastToken.type !== TokenType.ArrayFunction
+                        && lastToken.type !== TokenType.Random))) { // 表达式中除了运算符括号，还有数组操作的括号和随机值的括号，需要排除
                 if (token.value && Array.isArray(token.value)) {
                     const subExpressTokens: IToken[] = token.value;
                     const subExpress = this.parseExpressType(subExpressTokens);
@@ -1657,7 +1821,7 @@ export default class VFScriptParser {
             } else if (tokens[i].type === TokenType.Global) {
                 target.push(-1);
             } else if (tokens[i].type === TokenType.String ||
-                        tokens[i].type === TokenType.Number) {
+                tokens[i].type === TokenType.Number) {
                 target.push(tokens[i].value);
             } else if (tokens[i].type === TokenType.Variable) {
                 break;
@@ -1670,7 +1834,7 @@ export default class VFScriptParser {
                 if (tokens[i].type === TokenType.Variable) {
                     continue;
                 } else if (tokens[i].type === TokenType.String ||
-                            tokens[i].type === TokenType.Number) {
+                    tokens[i].type === TokenType.Number) {
                     express.push(tokens[i].value);
                 } else if (tokens[i].type === TokenType.Dot) {
                     break;
@@ -1684,7 +1848,7 @@ export default class VFScriptParser {
                 if (tokens[i].type === TokenType.Dot) {
                     continue;
                 } else if (tokens[i].type === TokenType.String ||
-                            tokens[i].type === TokenType.Number) {
+                    tokens[i].type === TokenType.Number) {
                     express.push(tokens[i].value);
                     express[0] = ExpressItemType.OBJECT_VALUE;
                 }
@@ -1714,7 +1878,7 @@ export default class VFScriptParser {
             } else if (tokens[i].type === TokenType.Global) {
                 target.push(-1);
             } else if (tokens[i].type === TokenType.String ||
-                        tokens[i].type === TokenType.Number) {
+                tokens[i].type === TokenType.Number) {
                 target.push(tokens[i].value);
             } else if (tokens[i].type === TokenType.Dot) {
                 break;
@@ -1735,7 +1899,7 @@ export default class VFScriptParser {
             } else if (tokens[i].type === TokenType.Global) {
                 target.push(-1);
             } else if (tokens[i].type === TokenType.String ||
-                        tokens[i].type === TokenType.Number) {
+                tokens[i].type === TokenType.Number) {
                 target.push(tokens[i].value);
             } else if (tokens[i].type === TokenType.Dot) {
                 break;
@@ -1748,7 +1912,7 @@ export default class VFScriptParser {
                 if (tokens[i].type === TokenType.Dot) {
                     continue;
                 } else if (tokens[i].type === TokenType.String ||
-                            tokens[i].type === TokenType.Number) {
+                    tokens[i].type === TokenType.Number) {
                     express.push(tokens[i].value);
                 }
             }
@@ -1768,7 +1932,7 @@ export default class VFScriptParser {
             } else if (tokens[i].type === TokenType.Global) {
                 target.push(-1);
             } else if (tokens[i].type === TokenType.String ||
-                        tokens[i].type === TokenType.Number) {
+                tokens[i].type === TokenType.Number) {
                 target.push(tokens[i].value);
             } else if (tokens[i].type === TokenType.Variable) {
                 break;
@@ -1782,7 +1946,7 @@ export default class VFScriptParser {
                 if (tokens[i].type === TokenType.Variable) {
                     continue;
                 } else if (tokens[i].type === TokenType.String ||
-                            tokens[i].type === TokenType.Number) {
+                    tokens[i].type === TokenType.Number) {
                     express.push(tokens[i].value);
                 } else if (tokens[i].type === TokenType.SquareBracket) {
                     const indexItem = this.parseExpressTypeFromBracket(tokens[i]);
@@ -1804,7 +1968,7 @@ export default class VFScriptParser {
                 if (tokens[i].type === TokenType.Dot) {
                     continue;
                 } else if (tokens[i].type === TokenType.String ||
-                            tokens[i].type === TokenType.Number) {
+                    tokens[i].type === TokenType.Number) {
                     express.push(tokens[i].value);
                 }
             }
@@ -1826,7 +1990,7 @@ export default class VFScriptParser {
             } else if (tokens[i].type === TokenType.Global) {
                 target.push(-1);
             } else if (tokens[i].type === TokenType.String ||
-                        tokens[i].type === TokenType.Number) {
+                tokens[i].type === TokenType.Number) {
                 target.push(tokens[i].value);
             } else if (tokens[i].type === TokenType.Variable) {
                 break;
@@ -1840,7 +2004,7 @@ export default class VFScriptParser {
                 if (tokens[i].type === TokenType.Variable) {
                     continue;
                 } else if (tokens[i].type === TokenType.String ||
-                            tokens[i].type === TokenType.Number) {
+                    tokens[i].type === TokenType.Number) {
                     express.push(tokens[i].value);
                 } else if (tokens[i].type === TokenType.Dot) {
                     break;
@@ -1865,7 +2029,7 @@ export default class VFScriptParser {
             } else if (tokens[i].type === TokenType.Global) {
                 target.push(-1);
             } else if (tokens[i].type === TokenType.String ||
-                        tokens[i].type === TokenType.Number) {
+                tokens[i].type === TokenType.Number) {
                 target.push(tokens[i].value);
             } else if (tokens[i].type === TokenType.Variable) {
                 break;
@@ -1879,7 +2043,7 @@ export default class VFScriptParser {
                 if (tokens[i].type === TokenType.Variable) {
                     continue;
                 } else if (tokens[i].type === TokenType.String ||
-                            tokens[i].type === TokenType.Number) {
+                    tokens[i].type === TokenType.Number) {
                     express.push(tokens[i].value);
                 } else if (tokens[i].type === TokenType.Dot) {
                     break;
@@ -1905,6 +2069,21 @@ export default class VFScriptParser {
         return express;
     }
 
+    private parseComponentOrExpressItem(tokens: IToken[]): string[] | ExpressItem | undefined {
+        let targetComponent: string[] | ExpressItem | undefined;
+        let tokenType: string = '';
+        for (let i: number = 0, len: number = tokens.length; i < len; i++) {
+            const token = tokens[i];
+            tokenType += token.type;
+        }
+        if (this.regExpressItem.test(tokenType)) {
+            targetComponent = this.parseExpressItem(tokens, tokenType);
+        } else {
+            targetComponent = this.parseComponent(tokens);
+        }
+        return targetComponent;
+    }
+
     private parseComponent(tokens: IToken[]): string[] {
         const targetComponent: string[] = [];
         for (let i: number = 0, len: number = tokens.length; i < len; i++) {
@@ -1917,8 +2096,8 @@ export default class VFScriptParser {
     }
 
     private parseEventParamFromBracket(paramToken: IToken): {ok: boolean,
-                                                             eventName: string,
-                                                             function: string | IAction[]} {
+        eventName: string,
+        function: string | IAction[]} {
         const eventParam: {ok: boolean, eventName: string, function: string | IAction[]} = {
             ok: false,
             eventName: '',
@@ -1949,7 +2128,7 @@ export default class VFScriptParser {
             }
         }
         if (eventNameToken.length === 3 &&
-           (eventNameToken[1].type === TokenType.String || eventNameToken[1].type === TokenType.Number)) {
+            (eventNameToken[1].type === TokenType.String || eventNameToken[1].type === TokenType.Number)) {
             eventParam.eventName = eventNameToken[1].value as string;
             hasName = true;
         }
@@ -2015,6 +2194,60 @@ export default class VFScriptParser {
             }
         }
         return funParam;
+    }
+
+    private parseFunctionParamFromBracket2(paramToken: IToken): Array<{type: ParamType, value: any}> {
+        const funParam: Array<{type: ParamType, value: any}> = [];
+
+        const fToken: IToken[] = [];
+        let fTokenType: string = '';
+        let tokens: IToken[] = [];
+
+        if (paramToken.type === TokenType.Bracket) {
+            tokens = paramToken.value as IToken[];
+        } else {
+            return funParam;
+        }
+        for (let i: number = 0, len: number = tokens.length; i < len; i++) {
+            const token = tokens[i];
+
+            if (token.type !== TokenType.Comma) {
+                fToken.push(token);
+                fTokenType += token.type;
+            } else {
+                const expressItem = this.parseFunctionOneParam(fToken.concat(), fTokenType);
+                fTokenType = '';
+                fToken.length = 0;
+                if (expressItem) {
+                    funParam.push(expressItem);
+                }
+            }
+            if (i >= len - 1 && fToken.length > 0) {
+                const expressItem = this.parseFunctionOneParam(fToken.concat(), fTokenType);
+                fTokenType = '';
+                fToken.length = 0;
+                if (expressItem) {
+                    funParam.push(expressItem);
+                }
+            }
+        }
+        return funParam;
+    }
+
+    private parseFunctionOneParam(tokens: IToken[], tokenType: string): {type: ParamType, value: any} {
+        if (this.regClosureMaybe.test(tokenType) && tokens[2].value === VFS_Keyword.More) {
+            const fun = this.parseBlock(tokens[3]);
+            return {
+                type: ParamType.Closure,
+                value: fun,
+            };
+        } else {
+            const expressItem = this.parseExpressItem(tokens, tokenType);
+            return {
+                type: ParamType.ExpressItem,
+                value: expressItem,
+            };
+        }
     }
 
     private parseExpressTypeFromBracket(bracketToken: IToken): ExpressType {
@@ -2105,7 +2338,7 @@ export default class VFScriptParser {
             } else if (tokens[i].type === TokenType.Global) {
                 target.push(-1);
             } else if (tokens[i].type === TokenType.String ||
-                        tokens[i].type === TokenType.Number) {
+                tokens[i].type === TokenType.Number) {
                 target.push(tokens[i].value);
             } else {
                 break;

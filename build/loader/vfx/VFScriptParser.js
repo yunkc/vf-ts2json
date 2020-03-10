@@ -1,6 +1,12 @@
 "use strict";
 exports.__esModule = true;
 var IVFData_1 = require("./IVFData");
+var ParamType;
+(function (ParamType) {
+    ParamType[ParamType["ExpressItem"] = 0] = "ExpressItem";
+    ParamType[ParamType["Closure"] = 1] = "Closure";
+    ParamType[ParamType["CallbackFunction"] = 2] = "CallbackFunction";
+})(ParamType || (ParamType = {}));
 var TokenType;
 (function (TokenType) {
     TokenType["None"] = "0";
@@ -54,9 +60,9 @@ var VFS_Keyword;
     VFS_Keyword["JumpToScene"] = "jumpToScene";
     VFS_Keyword["JumpToNextScene"] = "jumpToNextScene";
     VFS_Keyword["JumpToPrevScene"] = "jumpToPrevScene";
-    VFS_Keyword["playAnimation"] = "playAnimation";
-    VFS_Keyword["gotoPlay"] = "gotoPlay";
-    VFS_Keyword["gotoStop"] = "gotoStop";
+    VFS_Keyword["PlayAnimation"] = "playAnimation";
+    VFS_Keyword["GotoPlay"] = "gotoPlay";
+    VFS_Keyword["GotoStop"] = "gotoStop";
     VFS_Keyword["Emit"] = "emit";
     VFS_Keyword["True"] = "true";
     VFS_Keyword["False"] = "false";
@@ -76,6 +82,10 @@ var VFS_Keyword;
     VFS_Keyword["For"] = "for";
     VFS_Keyword["In"] = "in";
     VFS_Keyword["Break"] = "break";
+    VFS_Keyword["Wait"] = "wait";
+    VFS_Keyword["SetTimeout"] = "setTimeout";
+    VFS_Keyword["SetInterval"] = "setInterval";
+    VFS_Keyword["SetEnterFrame"] = "setEnterFrame";
     // 下面为单字符关键词
     VFS_Keyword["Enter"] = "\n";
     VFS_Keyword["Space"] = " ";
@@ -180,7 +190,7 @@ var ExpressItemToken = '(' + VariableToken + '|' + PropertyToken + '|' + ObjectT
 var ArrayRandomToken = '(' + VariableToken + TokenType.Dot + TokenType.Random + TokenType.Bracket + ')';
 var VFScriptParser = /** @class */ (function () {
     function VFScriptParser() {
-        this.debug = false;
+        this.debug = true;
         this.regNumber = /^\d+$/;
         this.regDefineVariable = new RegExp(TokenType.DefaultVariable + '(' + TokenType.Global + ')?' + TokenType.Variable +
             '[' + TokenType.String + TokenType.Number + ']' +
@@ -198,6 +208,7 @@ var VFScriptParser = /** @class */ (function () {
             '(' + '(' + ExpressItemToken + '|' + ValueToken + ')' +
             '(' + '(' + OperateToken + ')+' + '(' + ExpressItemToken + '|' + ValueToken + '))+)' +
             ')'); // /(13|17|6|7|8|9|2|3)*(2|3)(13|17|6|7|8|9|2|3)*/;
+        this.regExpressItem = new RegExp(ExpressItemToken);
         this.regComment = new RegExp(TokenType.Slash + TokenType.Slash +
             TokenALL + '*'); // //xxxx;
         this.regVFFunction = new RegExp('(' + VfComponentToken + TokenType.Dot + ')?' + TokenType.VFFunction + TokenType.Bracket);
@@ -431,9 +442,13 @@ var VFScriptParser = /** @class */ (function () {
                     case VFS_Keyword.JumpToScene:
                     case VFS_Keyword.JumpToNextScene:
                     case VFS_Keyword.JumpToPrevScene:
-                    case VFS_Keyword.playAnimation:
-                    case VFS_Keyword.gotoPlay:
-                    case VFS_Keyword.gotoStop:
+                    case VFS_Keyword.PlayAnimation:
+                    case VFS_Keyword.GotoPlay:
+                    case VFS_Keyword.GotoStop:
+                    case VFS_Keyword.Wait:
+                    case VFS_Keyword.SetTimeout:
+                    case VFS_Keyword.SetInterval:
+                    case VFS_Keyword.SetEnterFrame:
                         token.type = TokenType.VFFunction;
                         break;
                     case VFS_Keyword.Add:
@@ -560,7 +575,13 @@ var VFScriptParser = /** @class */ (function () {
             action = this.parseComment(astStack.concat()); // 解析注释
         }
         else if (this.regDefineVariable.test(curToken)) { // 解析全局变量
-            action = this.parseDefineVariable(astStack.concat());
+            var actions = this.parseDefineVariable(astStack.concat());
+            if (actions.length > 0) {
+                action = actions[0];
+                if (actions.length > 1) {
+                    this.warn('define variable must be a simple const value');
+                }
+            }
         }
         return action;
     };
@@ -586,7 +607,7 @@ var VFScriptParser = /** @class */ (function () {
         var ast = [];
         var astStack = [];
         var curToken = '';
-        var action;
+        var actions;
         var tokens = [];
         var tokenDefineFunction = TokenType.Function + TokenType.String + TokenType.Bracket + TokenType.Block;
         if (blockToken.type === TokenType.Block) {
@@ -598,7 +619,7 @@ var VFScriptParser = /** @class */ (function () {
         for (var i = 0, len = tokens.length; i < len; i++) {
             var token = tokens[i];
             if (token.type === TokenType.Semicolon) {
-                action = this.parseAction(astStack.concat(), curToken);
+                actions = this.parseAction(astStack.concat(), curToken);
                 astStack.length = 0;
                 curToken = '';
             }
@@ -606,31 +627,34 @@ var VFScriptParser = /** @class */ (function () {
                 astStack.push(token);
                 curToken += token.type.toString();
                 if (curToken === tokenDefineFunction) { // 定义方法 防止定义方法后面不加分号
-                    action = this.parseAction(astStack.concat(), curToken);
+                    actions = this.parseAction(astStack.concat(), curToken);
                     astStack.length = 0;
                     curToken = '';
                 }
                 else if (this.regVFFunction.test(curToken)) { // 防止xx.on('',()=>{}) 后面不加分号
-                    action = this.parseAction(astStack.concat(), curToken);
+                    actions = this.parseAction(astStack.concat(), curToken);
                     astStack.length = 0;
                     curToken = '';
                 }
             }
             if (i === len - 1 && astStack.length > 0) {
-                action = this.parseAction(astStack.concat(), curToken);
+                actions = this.parseAction(astStack.concat(), curToken);
                 astStack.length = 0;
                 curToken = '';
             }
-            if (action) {
-                ast.push(action);
-                action = undefined;
+            if (actions && actions.length) {
+                for (var j = 0, jlen = actions.length; j < jlen; j++) {
+                    ast.push(actions[j]);
+                }
+                actions = undefined;
             }
         }
         return ast;
     };
     VFScriptParser.prototype.parseAction = function (tokens, tokenType) {
+        var actions = [];
         if (tokens.length === 0) {
-            return undefined;
+            return actions;
         }
         this.log('parse action:', tokenType);
         for (var i = 0, len = this.actionRegs.length; i < len; i++) {
@@ -639,7 +663,14 @@ var VFScriptParser = /** @class */ (function () {
                 var action = void 0;
                 switch (i) {
                     case RegType.DefineVariable:
-                        action = this.parseDefineVariable(tokens);
+                        var defineActions = this.parseDefineVariable(tokens);
+                        if (defineActions.length === 2) {
+                            actions.push(defineActions[0]);
+                            action = defineActions[1];
+                        }
+                        else if (defineActions.length === 1) {
+                            action = defineActions[0];
+                        }
                         break;
                     case RegType.DefineFunction:
                         action = this.parseDefineFunction(tokens);
@@ -674,19 +705,22 @@ var VFScriptParser = /** @class */ (function () {
                     default:
                         break;
                 }
+                if (action) {
+                    actions.push(action);
+                }
                 this.log('parse action result:', action);
-                return action;
+                return actions;
             }
         }
         this.warn('parse action result: undefined', tokens);
-        return undefined;
+        return actions;
     };
     //////////////////////// 以下为解析实际的action每个都与一个ActionType对应////////////
     VFScriptParser.prototype.parseDefineVariable = function (tokens) {
         var idIndex = 2;
         var valueIndex = 4;
         var isGlobal = false;
-        if (tokens.length === 6) {
+        if (tokens.length >= 6 && tokens[1].type === TokenType.Global) {
             idIndex = 3;
             valueIndex = 5;
             isGlobal = true;
@@ -700,28 +734,52 @@ var VFScriptParser = /** @class */ (function () {
         if (isGlobal) {
             defineVariableTask.target = [-1];
         }
-        if (tokens[valueIndex].type === TokenType.Number || tokens[valueIndex].type === TokenType.String) {
-            defineVariableTask.variableType = "number" /* NUMBER */;
-            defineVariableTask.value = this.parseNumberFromTokens(tokens, valueIndex);
+        var sub = tokens.concat();
+        for (var i = 0, len = valueIndex; i < len; i++) {
+            sub.shift();
         }
-        else if (tokens[valueIndex].type === TokenType.Quotation ||
-            tokens[valueIndex].type === TokenType.DoubleQuotation) {
-            defineVariableTask.variableType = "string" /* STRING */;
-            defineVariableTask.value = this.parseStringFromTokens(tokens, valueIndex);
+        var subExpress = this.parseExpressType(sub);
+        if (subExpress.length === 1 && subExpress[0][0] === 0) {
+            if (tokens[valueIndex].type === TokenType.Number || tokens[valueIndex].type === TokenType.String) {
+                defineVariableTask.variableType = "number" /* NUMBER */;
+                defineVariableTask.value = this.parseNumberFromTokens(tokens, valueIndex);
+            }
+            else if (tokens[valueIndex].type === TokenType.Quotation ||
+                tokens[valueIndex].type === TokenType.DoubleQuotation) {
+                defineVariableTask.variableType = "string" /* STRING */;
+                defineVariableTask.value = this.parseStringFromTokens(tokens, valueIndex);
+            }
+            else if (tokens[valueIndex].type === TokenType.Boolean) {
+                defineVariableTask.variableType = "boolean" /* BOOLEAN */;
+                defineVariableTask.value = tokens[valueIndex].value === VFS_Keyword.True ? true : false;
+            }
+            else if (tokens[valueIndex].type === TokenType.Block) {
+                defineVariableTask.variableType = "object" /* OBJECT */;
+                defineVariableTask.value = this.parseObjectFromBlock(tokens[valueIndex]);
+            }
+            else if (tokens[valueIndex].type === TokenType.SquareBracket) {
+                defineVariableTask.variableType = "array" /* ARRAY */;
+                defineVariableTask.value = this.parseArrayFromSquare(tokens[valueIndex]);
+            }
         }
-        else if (tokens[valueIndex].type === TokenType.Boolean) {
-            defineVariableTask.variableType = "boolean" /* BOOLEAN */;
-            defineVariableTask.value = tokens[valueIndex].value === VFS_Keyword.True ? true : false;
-        }
-        else if (tokens[valueIndex].type === TokenType.Block) {
+        else {
             defineVariableTask.variableType = "object" /* OBJECT */;
-            defineVariableTask.value = this.parseObjectFromBlock(tokens[valueIndex]);
+            if (subExpress.length > 0) {
+                subExpress.unshift([5, '=']);
+                if (isGlobal) {
+                    subExpress.unshift([1, [-1], defineVariableTask.varId]);
+                }
+                else {
+                    subExpress.unshift([1, [], defineVariableTask.varId]);
+                }
+                var expressTask = {
+                    type: 6 /* Express */,
+                    express: subExpress
+                };
+                return [defineVariableTask, expressTask];
+            }
         }
-        else if (tokens[valueIndex].type === TokenType.SquareBracket) {
-            defineVariableTask.variableType = "array" /* ARRAY */;
-            defineVariableTask.value = this.parseArrayFromSquare(tokens[valueIndex]);
-        }
-        return defineVariableTask;
+        return [defineVariableTask];
     };
     VFScriptParser.prototype.parseDefineFunction = function (tokens) {
         // function funname (param) {}
@@ -864,14 +922,26 @@ var VFScriptParser = /** @class */ (function () {
                 case VFS_Keyword.JumpToPrevScene:
                     vfFunction = this.parseJumpToPrevScene(tokens);
                     break;
-                case VFS_Keyword.playAnimation:
+                case VFS_Keyword.PlayAnimation:
                     vfFunction = this.parsePlayAnimation(tokens);
                     break;
-                case VFS_Keyword.gotoPlay:
+                case VFS_Keyword.GotoPlay:
                     vfFunction = this.parseGotoPlay(tokens);
                     break;
-                case VFS_Keyword.gotoStop:
+                case VFS_Keyword.GotoStop:
                     vfFunction = this.parseGotoStop(tokens);
+                    break;
+                case VFS_Keyword.Wait:
+                    vfFunction = this.parseWait(tokens);
+                    break;
+                case VFS_Keyword.SetTimeout:
+                    vfFunction = this.parseSetTimeout(tokens);
+                    break;
+                case VFS_Keyword.SetInterval:
+                    vfFunction = this.parseSetInterval(tokens);
+                    break;
+                case VFS_Keyword.SetEnterFrame:
+                    vfFunction = this.parseSetEnterFrame(tokens);
                     break;
                 default:
                     break;
@@ -880,25 +950,31 @@ var VFScriptParser = /** @class */ (function () {
         this.log('parse vf function after:', vfFunction);
         return vfFunction;
     };
-    VFScriptParser.prototype.parseAddListener = function (tokens) {
+    VFScriptParser.prototype.parseVFFunctionTarget = function (tokens) {
         var componentTokens = [];
-        var paramsToken;
-        for (var i = 0, len = tokens.length; i < len; i++) {
-            if (tokens[i].type !== TokenType.Dot) {
+        for (var i = 0, len = tokens.length - 2; i < len; i++) {
+            if (tokens[i + 2].type !== TokenType.Bracket) {
                 componentTokens.push(tokens[i]);
             }
             else {
                 break;
             }
         }
+        if (componentTokens.length > 0) {
+            var target = this.parseComponentOrExpressItem(componentTokens);
+            return target;
+        }
+    };
+    VFScriptParser.prototype.parseAddListener = function (tokens) {
+        var paramsToken;
+        var target = this.parseVFFunctionTarget(tokens);
         for (var i = tokens.length - 1; i >= 0; i--) {
             if (tokens[i].type === TokenType.Bracket) {
                 paramsToken = tokens[i];
                 break;
             }
         }
-        if (componentTokens.length > 0 && paramsToken) {
-            var target = this.parseComponent(componentTokens);
+        if (target && paramsToken) {
             var eventParam = this.parseEventParamFromBracket(paramsToken);
             if (eventParam.ok) {
                 var addListenerTask = {
@@ -906,11 +982,11 @@ var VFScriptParser = /** @class */ (function () {
                     event: eventParam.eventName,
                     target: target
                 };
-                if (componentTokens.length) {
-                    if (componentTokens[0].type === TokenType.Global) {
+                if (tokens.length) {
+                    if (tokens[0].type === TokenType.Global) {
                         addListenerTask.global = true;
                     }
-                    else if (componentTokens[0].type === TokenType.System) {
+                    else if (tokens[0].type === TokenType.System) {
                         addListenerTask.system = true;
                     }
                 }
@@ -926,36 +1002,27 @@ var VFScriptParser = /** @class */ (function () {
         }
     };
     VFScriptParser.prototype.parseRemoveListener = function (tokens) {
-        var componentTokens = [];
         var paramsToken;
-        for (var i = 0, len = tokens.length; i < len; i++) {
-            if (tokens[i].type !== TokenType.Dot) {
-                componentTokens.push(tokens[i]);
-            }
-            else {
-                break;
-            }
-        }
+        var target = this.parseVFFunctionTarget(tokens);
         for (var i = tokens.length - 1; i >= 0; i--) {
             if (tokens[i].type === TokenType.Bracket) {
                 paramsToken = tokens[i];
                 break;
             }
         }
-        if (componentTokens.length > 0 && paramsToken) {
-            var target = this.parseComponent(componentTokens);
+        if (target && paramsToken) {
             var eventParam = this.parseEventParamFromBracket(paramsToken);
             if (eventParam.eventName) {
                 var addListenerTask = {
-                    type: 13 /* AddEventListener */,
+                    type: 14 /* RemoveEventListener */,
                     event: eventParam.eventName,
                     target: target
                 };
-                if (componentTokens.length) {
-                    if (componentTokens[0].type === TokenType.Global) {
+                if (tokens.length) {
+                    if (tokens[0].type === TokenType.Global) {
                         addListenerTask.global = true;
                     }
-                    else if (componentTokens[0].type === TokenType.System) {
+                    else if (tokens[0].type === TokenType.System) {
                         addListenerTask.system = true;
                     }
                 }
@@ -964,35 +1031,26 @@ var VFScriptParser = /** @class */ (function () {
         }
     };
     VFScriptParser.prototype.parseEmit = function (tokens) {
-        var componentTokens = [];
         var paramsToken;
-        for (var i = 0, len = tokens.length; i < len; i++) {
-            if (tokens[i].type !== TokenType.Dot) {
-                componentTokens.push(tokens[i]);
-            }
-            else {
-                break;
-            }
-        }
+        var target = this.parseVFFunctionTarget(tokens);
         for (var i = tokens.length - 1; i >= 0; i--) {
             if (tokens[i].type === TokenType.Bracket) {
                 paramsToken = tokens[i];
                 break;
             }
         }
-        if (componentTokens.length > 0 && paramsToken) {
-            var target = this.parseComponent(componentTokens);
+        if (target && paramsToken) {
             var eventParam = this.parseExpressTypeFromBracket(paramsToken);
             var emitTask = {
                 type: 15 /* EmitEvent */,
                 event: '',
                 target: target
             };
-            if (componentTokens.length) {
-                if (componentTokens[0].type === TokenType.Global) {
+            if (tokens.length) {
+                if (tokens[0].type === TokenType.Global) {
                     emitTask.global = true;
                 }
-                else if (componentTokens[0].type === TokenType.System) {
+                else if (tokens[0].type === TokenType.System) {
                     emitTask.system = true;
                 }
             }
@@ -1124,19 +1182,20 @@ var VFScriptParser = /** @class */ (function () {
         var funTokens = [];
         var i = 0;
         var len = 0;
-        for (i = 0, len = tokens.length; i < len; i++) {
-            if (tokens[i].type !== TokenType.Dot) {
+        for (i = 0, len = tokens.length - 2; i < len; i++) {
+            if (tokens[i + 2].type !== TokenType.Bracket) {
                 componentTokens.push(tokens[i]);
             }
             else {
                 break;
             }
         }
+        len = tokens.length;
         for (i++; i < len; i++) {
             funTokens.push(tokens[i]);
         }
         if (componentTokens.length > 0 && funTokens.length > 0) {
-            var target = this.parseComponent(componentTokens);
+            var target = this.parseComponentOrExpressItem(componentTokens);
             cusFunction.target = target;
             if (funTokens.length >= 2 &&
                 (funTokens[0].type === TokenType.String || funTokens[0].type === TokenType.VFFunction) &&
@@ -1234,6 +1293,98 @@ var VFScriptParser = /** @class */ (function () {
             return funAction;
         }
         return undefined;
+    };
+    VFScriptParser.prototype.parseWait = function (tokens) {
+        var params = this.parseFunctionParamFromBracket(tokens[1]);
+        if (params.length === 0) {
+            return;
+        }
+        var waitTask = {
+            type: 40 /* Wait */,
+            value: params[0]
+        };
+        return waitTask;
+    };
+    VFScriptParser.prototype.parseSetTimeout = function (tokens) {
+        var paramsToken;
+        for (var i = tokens.length - 1; i >= 0; i--) {
+            if (tokens[i].type === TokenType.Bracket) {
+                paramsToken = tokens[i];
+                break;
+            }
+        }
+        if (paramsToken) {
+            var params = this.parseFunctionParamFromBracket2(paramsToken);
+            if (params && params.length >= 2) {
+                var setTimeoutAction = {
+                    type: 41 /* SetTimeout */
+                };
+                if (params[0].type === ParamType.ExpressItem) {
+                    setTimeoutAction.value = params[0].value;
+                }
+                if (params[1].type === ParamType.Closure) {
+                    setTimeoutAction.execute = params[1].value;
+                }
+                if (setTimeoutAction.value && setTimeoutAction.execute) {
+                    return setTimeoutAction;
+                }
+            }
+        }
+    };
+    VFScriptParser.prototype.parseSetInterval = function (tokens) {
+        var paramsToken;
+        for (var i = tokens.length - 1; i >= 0; i--) {
+            if (tokens[i].type === TokenType.Bracket) {
+                paramsToken = tokens[i];
+                break;
+            }
+        }
+        if (paramsToken) {
+            var params = this.parseFunctionParamFromBracket2(paramsToken);
+            if (params && params.length >= 2) {
+                var setIntervalAction = {
+                    type: 42 /* SetInterval */
+                };
+                if (params[0].type === ParamType.ExpressItem) {
+                    setIntervalAction.value = params[0].value;
+                }
+                if (params[1].type === ParamType.Closure) {
+                    setIntervalAction.execute = params[1].value;
+                }
+                else if (params[1].type === ParamType.ExpressItem) {
+                    setIntervalAction.times = params[1].value;
+                }
+                if (params.length >= 3 && params[2].type === ParamType.Closure) {
+                    setIntervalAction.execute = params[2].value;
+                }
+                if (setIntervalAction.value && setIntervalAction.execute) {
+                    return setIntervalAction;
+                }
+            }
+        }
+    };
+    VFScriptParser.prototype.parseSetEnterFrame = function (tokens) {
+        var paramsToken;
+        for (var i = tokens.length - 1; i >= 0; i--) {
+            if (tokens[i].type === TokenType.Bracket) {
+                paramsToken = tokens[i];
+                break;
+            }
+        }
+        if (paramsToken) {
+            var params = this.parseFunctionParamFromBracket2(paramsToken);
+            if (params && params.length >= 1) {
+                var setEnterFrameAction = {
+                    type: 43 /* EnterFrame */
+                };
+                if (params[0].type === ParamType.Closure) {
+                    setEnterFrameAction.execute = params[0].value;
+                }
+                if (setEnterFrameAction.execute) {
+                    return setEnterFrameAction;
+                }
+            }
+        }
     };
     //////////////////////// 以上为解析实际的action每个都与一个ActionType对应////////////
     VFScriptParser.prototype.parseNumberFromTokens = function (tokens, start) {
@@ -1877,6 +2028,21 @@ var VFScriptParser = /** @class */ (function () {
         }
         return express;
     };
+    VFScriptParser.prototype.parseComponentOrExpressItem = function (tokens) {
+        var targetComponent;
+        var tokenType = '';
+        for (var i = 0, len = tokens.length; i < len; i++) {
+            var token = tokens[i];
+            tokenType += token.type;
+        }
+        if (this.regExpressItem.test(tokenType)) {
+            targetComponent = this.parseExpressItem(tokens, tokenType);
+        }
+        else {
+            targetComponent = this.parseComponent(tokens);
+        }
+        return targetComponent;
+    };
     VFScriptParser.prototype.parseComponent = function (tokens) {
         var targetComponent = [];
         for (var i = 0, len = tokens.length; i < len; i++) {
@@ -1987,6 +2153,58 @@ var VFScriptParser = /** @class */ (function () {
             }
         }
         return funParam;
+    };
+    VFScriptParser.prototype.parseFunctionParamFromBracket2 = function (paramToken) {
+        var funParam = [];
+        var fToken = [];
+        var fTokenType = '';
+        var tokens = [];
+        if (paramToken.type === TokenType.Bracket) {
+            tokens = paramToken.value;
+        }
+        else {
+            return funParam;
+        }
+        for (var i = 0, len = tokens.length; i < len; i++) {
+            var token = tokens[i];
+            if (token.type !== TokenType.Comma) {
+                fToken.push(token);
+                fTokenType += token.type;
+            }
+            else {
+                var expressItem = this.parseFunctionOneParam(fToken.concat(), fTokenType);
+                fTokenType = '';
+                fToken.length = 0;
+                if (expressItem) {
+                    funParam.push(expressItem);
+                }
+            }
+            if (i >= len - 1 && fToken.length > 0) {
+                var expressItem = this.parseFunctionOneParam(fToken.concat(), fTokenType);
+                fTokenType = '';
+                fToken.length = 0;
+                if (expressItem) {
+                    funParam.push(expressItem);
+                }
+            }
+        }
+        return funParam;
+    };
+    VFScriptParser.prototype.parseFunctionOneParam = function (tokens, tokenType) {
+        if (this.regClosureMaybe.test(tokenType) && tokens[2].value === VFS_Keyword.More) {
+            var fun = this.parseBlock(tokens[3]);
+            return {
+                type: ParamType.Closure,
+                value: fun
+            };
+        }
+        else {
+            var expressItem = this.parseExpressItem(tokens, tokenType);
+            return {
+                type: ParamType.ExpressItem,
+                value: expressItem
+            };
+        }
     };
     VFScriptParser.prototype.parseExpressTypeFromBracket = function (bracketToken) {
         var funParam = [];

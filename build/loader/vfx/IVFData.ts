@@ -1,4 +1,3 @@
-
 export interface IVFDataV1 {
     name: string;
     version: string;
@@ -12,7 +11,7 @@ export interface IVFDataV1 {
     global?: { [id: string]: IVariableData };
     assets: { [id: string]: IAsset };
     components: { [id: string]: AllComponent };
- scenes: IScene[];
+    scenes: IScene[];
 }
 
 export const enum ScaleMode {
@@ -109,7 +108,7 @@ export interface IDisplayComponent extends IComponent {
 
 }
 
-export interface IImage extends IDisplayComponent{
+export interface IImage extends IDisplayComponent {
 
 }
 export interface IText extends IDisplayComponent{
@@ -243,8 +242,8 @@ export interface IScene {
 }
 export interface ISoundTrackMedia {
     id: string;
-    media: string
-    sound: string;
+    media: any;
+    sound: any;
 }
 export type AllComponent = (IComponent | IDisplayComponent | ICustomComponent |
     IRadio | IImage | IText | IRect);
@@ -277,7 +276,6 @@ export type ExpressType = ExpressItem[]; // 表达式
 
 /** 通用状态 */
 export const enum VFStateCode {
-    ERROR = 'error',
     INIT = 'init',
     LOAD = 'load',
     LOADED = 'loaded',
@@ -287,47 +285,51 @@ export const enum VFStateCode {
 }
 
 export const enum ActionType {
-        Print,
-        Add,
-        Added,
-        Remove,
-        SetProperty,
-        Click,
-        Express,
-        IfGroup,
-        If,
-        ElseIf,
-        Else,
-        DefineFunction,
-        CallFunction,
-        AddEventListener,
-        RemoveEventListener,
-        EmitEvent,
-        PlaySound,
-        PlayAnimation,
-        JumpToNextScene,
-        JumpToPrevScene,
-        JumpToScene,
-        ArrayInit,
-        ArrayPop,
-        ArrayPush,
-        ArraySplice,
-        ArrayRandom,
-        ArrayConcat,
-        ArrayShift,
-        ArrayUnshift,
-        AddEventListenerCall,
-        CallProtoFunction,
-        GotoPlay,
-        GotoStop,
-        PauseSound,
-        ResumeSound,
-        Comment,
-        ActionList,
-        DefineVariable,
-        For,
-        Break,
-    }
+    Print,
+    Add,
+    Added,
+    Remove,
+    SetProperty,
+    Click,
+    Express,
+    IfGroup,
+    If,
+    ElseIf,
+    Else,
+    DefineFunction,
+    CallFunction,
+    AddEventListener,
+    RemoveEventListener,
+    EmitEvent,
+    PlaySound,
+    PlayAnimation,
+    JumpToNextScene,
+    JumpToPrevScene,
+    JumpToScene,
+    ArrayInit,
+    ArrayPop,
+    ArrayPush,
+    ArraySplice,
+    ArrayRandom,
+    ArrayConcat,
+    ArrayShift,
+    ArrayUnshift,
+    AddEventListenerCall,
+    CallProtoFunction,
+    GotoPlay,
+    GotoStop,
+    PauseSound,
+    ResumeSound,
+    Comment,
+    ActionList,
+    DefineVariable,
+    For,
+    Break,
+    Wait,
+    SetTimeout,
+    SetInterval,
+    EnterFrame,
+}
 export const enum ComponentEvent {
     Add = 'Add',
     Added = 'Added',
@@ -357,65 +359,65 @@ export const enum AnimationStatus {
 
 
 export interface IActionSetProperty extends IAction {
-        property: string;
-        value: any;
-    }
+    property: string;
+    value: any;
+}
 export interface IActionPlayAnimation extends IAction {
-        name: string | ExpressItem;
-        times?: number;
-    }
+    name: string | ExpressItem;
+    times?: number;
+}
 export interface IActionExpress extends IAction {
-        express: ExpressType;
-    }
+    express: ExpressType;
+}
 export interface IActionIFPart extends IAction {
-        condition: ExpressType;
-    }
+    condition: ExpressType;
+}
 export interface IActionFunction extends IAction {
-        name: string;
-    }
+    name: string;
+}
 export interface IActionAddEventListener extends IAction {
-        event: string;
-        system?: boolean;
-        global?: boolean;
-        funName?: string;
-    }
+    event: string;
+    system?: boolean;
+    global?: boolean;
+    funName?: string;
+}
 export interface IActionEmitEvent extends IAction {
-        event: string;
-        system?: boolean;
-        global?: boolean;
-        eventData?: any;
-    }
+    event: string;
+    system?: boolean;
+    global?: boolean;
+    eventData?: any;
+}
 export interface IActionJump extends IAction {
-        transition?: ITransitionData;
-    }
+    transition?: ITransitionData;
+}
 export interface IActionArraySplice extends IAction {
-        start: number;
-        deleteCount: number;
-    }
+    start: number;
+    deleteCount: number;
+}
 export interface IActionArrayConcat extends IAction {
-        concatArr: ExpressItem;
-    }
+    concatArr: ExpressItem;
+}
 export interface IActionCallFunction extends IAction {
-        name: string | ExpressItem;
-        params?: ExpressItem[];
-    }
+    name: string | ExpressItem;
+    params?: ExpressItem[];
+}
 export interface IActionPlaySound extends IAction {
-        trackId?: string;
-        useNative?: boolean;
-        mode?: 'sound' | 'effect';
-    }
+    trackId?: string;
+    useNative?: boolean;
+    mode?: 'sound' | 'effect';
+}
 export interface IActionGoto extends IAction {
-        name: string | ExpressItem;
-        frame: number| ExpressItem;
-        times?: number | ExpressItem;
-    }
+    name: string | ExpressItem;
+    frame: number| ExpressItem;
+    times?: number | ExpressItem;
+}
 export interface IActionDefineVariable extends IAction {
-        variableType: VariableType;
-        varId: string;
-    }
+    variableType: VariableType;
+    varId: string;
+}
 export interface IActionFor extends IAction {
-        forin: ExpressItem;
-    }
+    forin: ExpressItem;
+}
 export type AllAction = (IAction | IActionSetProperty | IActionExpress | IActionFunction
     | IActionAddEventListener | IActionPlayAnimation);
 
@@ -482,5 +484,8 @@ export interface IActionGoto extends IAction {
 export interface IActionDefineVariable extends IAction {
     variableType: VariableType;
     varId: string;
+}
+export interface IActionInterval extends IAction {
+    times?: number | ExpressItem;
 }
 
