@@ -20,15 +20,67 @@ export namespace gui {
     }
 
     export interface Button extends Base, DisplayComponent {
-        type: guiType.button
+        type: guiType.BUTTON,
+        up: number | string,
+        move: number | string,
+        down: number | string,
+        upAndSelected?: number | string,
+        downAndSelected?: number | string,
+        moveAndSelected?: number | string,
     }
 
     export interface Custom extends Base, DisplayComponent {
-        type: guiType.custom,
+        type: guiType.CUSTOM,
         children?: CustomChildrenItem[],
-        animations?: [],
+        animations?: AnimationItem[],
         props?: object,
         actionList?: ActionType[] | string
+    }
+
+    export interface AnimationItem  {
+        name: string;
+        duration?: number;
+        autoPlay?: boolean;
+        loop?: boolean;
+        children: { [id: string]: ISubAnimation };
+    }
+
+    export interface ISubAnimation {
+        duration?: number;
+        loop?: boolean;
+        timelines: ITimeline[];
+    }
+
+    export interface ITimeline {
+        type: TimelineType;
+        loop?: boolean;
+        frames: IFrame[];
+    }
+
+    export interface IFrame {
+        frame: number;
+        value: any;
+        curve?: number[];
+    }
+
+    export const enum TimelineType {
+        X = 'x',
+        Y = 'y',
+        SCALE_X = 'scaleX',
+        SCALE_Y = 'scaleY',
+        ROTATION = 'rotation',
+        COLOR = 'color',
+        ALPHA = 'alpha',
+        VISIBLE = 'visible',
+        TEXT = 'text',
+        PROGRESS = 'progress',
+        SKEW_X = 'skewX',
+        SKEW_Y = 'skewY',
+        PLAY = 'play',
+        VOLUME = 'volume',
+        ENABLED = 'enabled',
+        FILTER_BLUR = 'filterBlur',
+        EVENT = 'event',
     }
 
     export interface CustomChildrenItem extends DisplayComponent{
@@ -40,7 +92,7 @@ export namespace gui {
     }
 
     export interface Checkbox extends Base, DisplayComponent{
-        type: guiType.checkbox,
+        type: guiType.CHECKBOX,
         up: string,
         down: string,
         move: string,
@@ -52,17 +104,17 @@ export namespace gui {
     }
 
     export interface Image extends Base, DisplayComponent {
-        type: guiType.image,
+        type: guiType.IMAGE,
         src: string | number
     }
 
     export interface Text extends Base, DisplayComponent {
-        type: guiType.text,
+        type: guiType.TEXT,
         style?: Object
     }
 
     export interface Rect extends Base, DisplayComponent {
-        type: guiType.rect,
+        type: guiType.RECT,
         color: number
         width: number,
         height: number,
@@ -73,23 +125,31 @@ export namespace gui {
 }
 
 export enum guiType {
-    svg = 'svg',
-    npm = 'npm',
-    text = 'Label',
-    rect = 'Rect',
-    video = 'video',
-    audio = 'audio',
-    sheet = 'sheet',
-    image = 'Image',
-    table = 'table',
-    input = 'input',
-    slider = 'slider',
-    button = 'Button',
-    custom = 'custom',
-    graphic = 'graphic',
-    particle = 'particle',
-    checkbox = 'CheckBox',
-    container = 'container',
-    dragonbones = 'dragonbones',
-    microphone = 'microphone',
+    // UI
+    CONTAINER = 'container',
+    TABLE = 'table',
+    IMAGE = 'Image',
+    BUTTON = 'Button',
+    RADIO = 'CheckBox',
+    CHECKBOX = 'CheckBox',
+    INPUT = 'input',
+    SLIDER = 'slider',
+    TEXT = 'Label',
+    RECT = 'Rect',
+    CIRCLE = 'Circle',
+    // ANI
+    DRAGONBONES = 'dragonbones',
+    PARTICLE = 'particle',
+    SHEET = 'sheet',
+    // MEDIA
+    VIDEO = 'video',
+    AUDIO = 'audio',
+    MICROPHONE = 'microphone',
+    // NPM
+    NPM = 'npm',
+    // VECTOR
+    SVG = 'svg',
+    GRAPHIC = 'graphic',
+    // CUSTOM
+    CUSTOM = 'custom',
 }

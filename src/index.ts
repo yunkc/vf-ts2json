@@ -18,9 +18,9 @@ const Main: IVFTemplate = {
     height: App.height,
     version: App.version,
     baseUrl: App.baseUrl,
-    loadMode: LoadMode.all,
+    loadMode: LoadMode.ALL,
     conversion: App.conversion,
-    scaleMode: ScaleMode.showAll,
+    scaleMode: ScaleMode.SHOW_ALL,
 }
 
 export default Main;

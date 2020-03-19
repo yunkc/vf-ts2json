@@ -1,8 +1,13 @@
 import {Ids} from "./store";
+import {Scenes, SceneItem} from '../types/IVFTemplate'
 
-export default [
-    {
-        id: Ids.root,
-        libId: Ids.root.toString()
-    }
+const sceneItem1: SceneItem = {
+    id: Ids.root,
+    libId: Ids.root.toString()
+}
+
+const allScenes: Scenes = [
+    sceneItem1,
 ]
+
+export default allScenes

@@ -1,56 +1,90 @@
 import { gui } from './Component'
 
 export interface IVFTemplate {
-    width: Number,
     name: String,
+    width: Number,
     height: Number,
+    scenes: Scenes,
+    assets: Assets,
+    global: Global,
     baseUrl: String,
     version: String,
     conversion: String,
     loadMode: LoadMode,
-    scenes: SceneItem[],
     scaleMode: ScaleMode,
-    assets: { [key: string]: AssetItem },
-    global: { [key: string]: GlobalItem },
-    components: { [key: string]: gui.AllGUI }
+    components: Components
 }
 
-type GlobalItem = {
+export type Scenes = SceneItem[]
+
+export interface Assets {
+    [key: string]: AssetItem
+}
+
+export interface Global {
+    [key: string]: GlobalItem
+}
+export type GlobalItem = {
     value: any,
     type: string,
     describe?: string,
 } | number | string | boolean | any
 
-type SceneItem = {
-    id: string | number
-    libId: string | number
+export interface Components {
+    [key: string]: gui.AllGUI
 }
 
-type AssetItem = {
+export interface SceneItem {
+    id: string | number,
+    libId: string | number,
+    transition?: Transition
+}
+
+export interface Transition {
+    type: TransitionType;
+    duration: number;
+}
+
+export const enum TransitionType {
+    NONE = 'none',
+    FADE_OUT = 'fadeOut',
+    CIRCLE_WIPE = 'circleWipe',
+    CROSS_ZOOM = 'crossZoom',
+    DOOM_SCREEN = 'doomScreen',
+    HEART_WIPE = 'heartWipe',
+    LINEAR_BLUR = 'linearBlur',
+    PAGE_CURL = 'pageCurl',
+    TO_TEAR = 'toTear',
+    WIND = 'wind',
+    PAGE_FLIP_RIGHT = 'pageFlipRight',
+    PAGE_FLIP_LEFT = 'pageFlipLeft',
+}
+
+export type AssetItem = {
     type: AssetType,
     url: string
     name: string,
 }
 
 export enum ScaleMode {
-    cover = 'cover',
-    showAll = 'showAll',
-    noScale = 'noScale',
-    contain = 'contain',
+    SHOW_ALL = 'showAll',
+    NO_SCALE = 'noScale',
+    COVER = 'cover',
+    CONTAIN = 'contain',
 }
 
 export enum LoadMode {
-    all = 'all',
-    single = 'single'
+    SINGLE = 'single',
+    ALL = 'all',
 }
 
 export enum AssetType {
-    js = 'js',
-    svg = 'svg',
-    font = 'font',
-    image = 'image',
-    sound = 'sound',
-    sheet = 'sheet',
-    audio = 'audio',
-    video = 'video',
+    IMAGE = 'image',
+    SOUND = 'sound',
+    SHEET = 'sheet',
+    SVG = 'svg',
+    FONT = 'font',
+    AUDIO = 'audio',
+    VIDEO = 'video',
+    JS = 'js',
 }
