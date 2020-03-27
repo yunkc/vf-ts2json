@@ -19,7 +19,7 @@ Use Typescript build JSON files
 
 
 Here is ```t2j.config.json``` config 
-  ```js
+  ```json5
   {
       // config you entry file
       "entry": "./src/index.js",
