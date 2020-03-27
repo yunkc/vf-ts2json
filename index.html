@@ -23,149 +23,94 @@
 </head>
 
 <body>
-    <!-- 播放器的容器，调整播放器大小，可以改变这里 -->
-    <div id="vf-container"
-        style="background: #000000;;width: 100%; height: 100%;padding:0;margin:0;overflow: hidden; position: absolute;">
-    </div>
+    <div id="vf-container"></div>
 
-    <button id="funcall" style="z-index: 999; position: absolute; left: 50px; top:50px;">执行方法</button>
-    <button id="sendevent" style="z-index: 999; position: absolute; left: 150px; top:50px;">派发事件</button>
-    
     <script>
+      function CreateVF(option = {}) {
+        //错误计数
+        let errorLoadCount = 0;
+        function createVF() {
+          const vf = new VF(option);
 
-        (function () {
-
-            //本地或发布版本
-            var isProd = true;
-            //错误计数
-            var errorLoadCount = 0;
-            var option = {
-                container: document.getElementById("vf-container"),
-                engineVersion: "0.0.39", //引擎使用的版本
-                fixVersion:'1',
-                bgcolor: '0xffffff',
-                src: './vf-json/index.json', //设置模板数据源地址
-                conversionData: undefined,//需要转换的动态数据
-                debug: true,
-	            language: 'zh-CN',
-                // wmode : "transparent", /不填写，不会处理透明，默认白色背景
-                // scaleMode: 'showAll'//不填写，根据配置数据读取 'showAll', 'noScale','cover','contain'
-                vfvars: {
-                    useNativeAudio: true, //业务线动态设置,是否使用原生播放
-                    cdns:{ //必选,引擎库的cdn地址,正式环境需要设置,测试环境设置''
-                        default:[
-                            isProd? 'https://s.vipkidstatic.com/':"",
-                            isProd? 'https://s.vipkidresource.com/':"",
-                        ],
-                        image:[
-                            isProd? 'https://img.vipkidstatic.com/':"",
-                            isProd? 'https://img.vipkidresource.com/':"",
-                        ],
-                        media:[
-                            isProd? 'https://media.vipkidstatic.com/':"",
-                            isProd? 'https://media.vipkidresource.com/':"",
-                        ],
-                        wx:[
-                            isProd? 'https://wx.vipkidstatic.com/':"",
-                            isProd? 'https://wx.vipkidresource.com/':"",
-                        ],
-                    }
-                },
-                plugs: [
-                    //{ id: "BoardDrawPlug", role: 1 }, //内置插件,开启画板 role 1老师 2学生
-                    //{ id:"SliderEditorPlug", className:'upper-canvas'}, //互动课件业务特殊处理鼠标事件
-                ]
-            }
-
-            function createVF() {
-
-                var vf = new VF(option);
-
-                //详细的接口，可搜索：IVFEngine -> EngineAPI
-                vf.onReady = ()=>{
-                    console.log("html","onReady");
-
-                    //测试
-                    this.testCommond(vf);
-                }
-
-                vf.onSceneCreate = ()=>{
-
-                }
-
-                vf.onMessage = (msg)=>{
-                    console.log("onMessage ==>",msg);
-                }
-
-                vf.onError = (evt)=>{
-                    console.log("onError ==>",evt);
-                }
-
-                vf.onDispose = ()=>{
-
-                }
-
-                
-            }
-
-            function loadScript(index){
-                var cdn = option.vfvars.cdns.default;
-                var s = document.createElement('script');
-                s.async = false;
-                s.src = cdn[index] + '/vf/engine/vf-engine-v' + option.engineVersion + '/vf.js?v=' + option.fixVersion;
-                s.addEventListener('load', loadComplete, false);
-                s.addEventListener('error', loadError, false);
-                document.body.appendChild(s);
-            }
-
-            function loadComplete() {
-                removeEvent(this);
-                createVF();
-            }
-            function loadError() {
-                removeEvent(this);
-                if(errorLoadCount>3){
-                    throw ' [LOG VF] vf.js load error';
-                    return;
-                }
-                loadScript(1);
-                errorLoadCount++;
-            }
-            function removeEvent(thisObj){
-                thisObj.parentNode.removeChild(thisObj);
-                thisObj.removeEventListener('load', loadComplete, false);
-                thisObj.removeEventListener('error', loadError, false);
-            }
-
-            loadScript(0);
-
-        })();
-
-
-        var isAdd = false;
-        /** 向VF派发事件 */
-        function testCommond(vf) {
-            if(isAdd){
-                return;
-            }
-            isAdd = true;
-            var funcall = document.getElementById('funcall');
-            funcall.addEventListener("click", () => {
-                // 所有接口 IVFEngine -> IVFEngineAPI
-                //vf.dispose(); //卸载
-                vf.play('test/VF_STI01/index.json');
-            });
-
-            var sendevent = document.getElementById('sendevent');
-            sendevent.addEventListener('click',()=>{
-                
-                vf.message({"code": "restore","level": "command","data": {"name": "restore","val": {}}});
-
-                //code = 模板json中的 {"type": 13,"system": true,"event": code}
-                //vf.message({"code": "nextPage","level": "command","data":null});
-            });
+          //详细的接口，可搜索：IVFEngine -> EngineAPI
+          vf.onReady = option.onReady
+          vf.onError = option.onError
+          vf.onMessage = option.onMessage
+          vf.onDispose = option.onDispose
+          vf.onSceneCreate = option.onSceneCreate
         }
+        function loadScript(index){
+          var cdn = option.vfvars.cdns.default;
+          var s = document.createElement('script');
+          s.async = false;
+          s.src = cdn[index] + '/vf/engine/vf-engine-v' + option.engineVersion + '/vf.js?v=' + option.fixVersion;
+          s.addEventListener('load', loadComplete, false);
+          s.addEventListener('error', loadError, false);
+          document.body.appendChild(s);
+        }
+        function loadComplete() {
+          removeEvent(this);
+          createVF();
+        }
+        function loadError() {
+          removeEvent(this);
+          if(errorLoadCount>3){
+            throw ' [LOG VF] vf.js load error';
+            return;
+          }
+          loadScript(1);
+          errorLoadCount++;
+        }
+        function removeEvent(thisObj){
+          thisObj.parentNode.removeChild(thisObj);
+          thisObj.removeEventListener('load', loadComplete, false);
+          thisObj.removeEventListener('error', loadError, false);
+        }
+        loadScript(0);
+      }
 
+      CreateVF({
+        src: './vf-json/index.json',
+        debug: true,
+        vfvars: {
+          cdns: {
+            default:[
+              'https://s.vipkidstatic.com/',
+              'https://s.vipkidresource.com/',
+            ],
+            image:[
+              'https://img.vipkidstatic.com/',
+              'https://img.vipkidresource.com/',
+            ],
+            media:[
+              'https://media.vipkidstatic.com/',
+              'https://media.vipkidresource.com/',
+            ],
+            wx:[
+              'https://wx.vipkidstatic.com/',
+              'https://wx.vipkidresource.com/',
+            ],
+          }
+        },
+        bgcolor: '0xffffff',
+        engineVersion: "0.0.39",
+        container: document.querySelector('#vf-container'),
+        onReady: function () {
+
+        },
+        onError: function () {
+
+        },
+        onMessage: function () {
+
+        },
+        onDispose: function () {
+
+        },
+        onSceneCreate: function () {
+
+        }
+      });
 
     </script>
 </body>

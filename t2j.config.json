@@ -1,6 +1,6 @@
 {
   "entry": "./src/index.js",
-  "output": "../web/vf-json/",
+  "output": "./vf-json/",
   "spaces": 2,
   "debug": false
 }

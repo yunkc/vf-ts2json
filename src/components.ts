@@ -42,11 +42,7 @@ const root: gui.Custom = {
         }
     ],
     // 用 VFX 编写的可执行逻辑，文档请见 https://code.vipkid.com.cn/xyz/docs/blob/master/docs/handbook/aciton.md
-    actionList: `
-        @this = {
-            print('hello, vfx.');
-        }
-    `
+    actionList: []
 };
 
 const allComponents: Components = {

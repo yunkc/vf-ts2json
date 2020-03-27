@@ -1,0 +1,58 @@
+{
+  "assets": {
+    "1": {
+      "type": "image",
+      "url": "./assets/dino.png",
+      "name": "1"
+    }
+  },
+  "global": {},
+  "scenes": [
+    {
+      "id": 0,
+      "libId": "0"
+    }
+  ],
+  "components": {
+    "0": {
+      "type": "custom",
+      "children": [
+        {
+          "id": 1,
+          "libId": 1
+        },
+        {
+          "id": 2,
+          "libId": 2,
+          "text": "Hello World!",
+          "y": 298,
+          "x": 395
+        }
+      ],
+      "actionList": []
+    },
+    "1": {
+      "type": "Image",
+      "y": 140,
+      "width": 83,
+      "height": 138,
+      "src": 1,
+      "x": 403.5
+    },
+    "2": {
+      "type": "Label",
+      "width": 100,
+      "style": {
+        "color": "#000000"
+      }
+    }
+  },
+  "name": "VFT2J",
+  "width": 890,
+  "height": 500,
+  "version": "0.0.1",
+  "baseUrl": "",
+  "loadMode": "all",
+  "conversion": "",
+  "scaleMode": "showAll"
+}
