@@ -48,7 +48,7 @@ export interface StyleSheet {
     zIndex?: number,
     alpha?: number,
     visible?: boolean,
-    color? : number,
+    color? : number | string,
     letterSpacing? : number,
     wordWrap?: boolean,
     wordWrapWidth?: number,
@@ -71,5 +71,6 @@ export interface StyleSheet {
     breakWords? : boolean,
     gridSize?: number[],
     gridTemplateRow?: number,
-    gridTemplateColumns?: number
+    gridTemplateColumns?: number,
+    filter?: any
 }

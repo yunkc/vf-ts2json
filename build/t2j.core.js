@@ -4,6 +4,8 @@ const Utils = require('./utils')
 const chokidar = require('chokidar')
 const CONFIG = require('./t2j.config')
 const Loader = require('./t2j.loader')
+const checkUpdate = require('./checkUpdate')
+const liveServer = require('./server')
 
 const Log = new Utils.Log(CONFIG.debug)
 
@@ -13,7 +15,7 @@ function getEntryFileName() {
 }
 
 const entryFileName = getEntryFileName()
-const watcher = chokidar.watch(CONFIG.jsOutput)
+const watcher = chokidar.watch([CONFIG.jsOutput])
 const distJSON = Path.join(CONFIG.output, `${entryFileName}.json`)
 
 setTimeout(() => {
@@ -73,3 +75,12 @@ watcher.on('change', path => {
     fse.outputJson(distJSON, entryJSFile, {spaces: CONFIG.spaces})
   }
 });
+
+if (fse.existsSync(`${process.cwd()}/index.html`)) {
+  liveServer()
+
+  setTimeout(() => {
+    checkUpdate()
+  }, 1500)
+}
+

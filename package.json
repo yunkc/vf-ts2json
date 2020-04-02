@@ -5,13 +5,17 @@
   "main": "index.js",
   "scripts": {
     "debug": "node build/t2j.core.js",
-    "start": "tsc -w & node build/t2j.core.js"
+    "start": "tsc -w & node build/t2j.core.js",
+    "update": "node build/checkUpdate.js"
   },
   "author": "haojenma",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.19.2",
     "chokidar": "^3.3.0",
+    "express": "^4.17.1",
     "fs-extra": "^8.1.0",
+    "live-server": "^1.2.1",
     "require-json5": "^1.0.2"
   }
 }

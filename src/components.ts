@@ -22,7 +22,7 @@ const title: gui.Text = {
     type: guiType.TEXT,
     width: 100,
     style: {
-        color: '#000000'
+        color: '#000'
     }
 }
 
@@ -37,7 +37,7 @@ const root: gui.Custom = {
             id: Ids.title,
             libId: Ids.title,
             text: 'Hello World!',
-            y: dino.y! + 138 + 20,
+            y: dino.y! + 158,
             x: App.width / 2 - title.width! / 2
         }
     ],

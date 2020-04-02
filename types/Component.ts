@@ -17,6 +17,8 @@ export namespace gui {
         rotation?: any;
         width?: number;
         height?: number;
+        filterBlur?: number,
+        interactabled?: boolean
     }
 
     export interface Button extends Base, DisplayComponent {
@@ -88,7 +90,7 @@ export namespace gui {
         text?: string
         style?: StyleSheet
         id: string | number,
-        libId: string | number,
+        libId: string | number
     }
 
     export interface Checkbox extends Base, DisplayComponent{
@@ -110,7 +112,7 @@ export namespace gui {
 
     export interface Text extends Base, DisplayComponent {
         type: guiType.TEXT,
-        style?: Object
+        style?: StyleSheet
     }
 
     export interface Rect extends Base, DisplayComponent {

@@ -24,20 +24,46 @@
 
 <body>
     <div id="vf-container"></div>
-
     <script>
+      const VF_CONFIG = {
+        src: './vf-json/index.json',
+        debug: true,
+        vfvars: {
+          cdns: {
+            default:[
+              'https://s.vipkidstatic.com/',
+              'https://s.vipkidresource.com/',
+            ],
+            image:[
+              'https://img.vipkidstatic.com/',
+              'https://img.vipkidresource.com/',
+            ],
+            media:[
+              'https://media.vipkidstatic.com/',
+              'https://media.vipkidresource.com/',
+            ],
+            wx:[
+              'https://wx.vipkidstatic.com/',
+              'https://wx.vipkidresource.com/',
+            ],
+          }
+        },
+        bgcolor: '0xffffff',
+        engineVersion: "0.0.39",
+        container: document.querySelector('#vf-container')
+      }
+
       function CreateVF(option = {}) {
-        //错误计数
         let errorLoadCount = 0;
         function createVF() {
           const vf = new VF(option);
 
           //详细的接口，可搜索：IVFEngine -> EngineAPI
-          vf.onReady = option.onReady
-          vf.onError = option.onError
-          vf.onMessage = option.onMessage
-          vf.onDispose = option.onDispose
-          vf.onSceneCreate = option.onSceneCreate
+          vf.onReady = option.onReady || function(){}
+          vf.onError = option.onError || function(){}
+          vf.onMessage = option.onMessage || function(){}
+          vf.onDispose = option.onDispose || function(){}
+          vf.onSceneCreate = option.onSceneCreate || function(){}
         }
         function loadScript(index){
           var cdn = option.vfvars.cdns.default;
@@ -69,49 +95,7 @@
         loadScript(0);
       }
 
-      CreateVF({
-        src: './vf-json/index.json',
-        debug: true,
-        vfvars: {
-          cdns: {
-            default:[
-              'https://s.vipkidstatic.com/',
-              'https://s.vipkidresource.com/',
-            ],
-            image:[
-              'https://img.vipkidstatic.com/',
-              'https://img.vipkidresource.com/',
-            ],
-            media:[
-              'https://media.vipkidstatic.com/',
-              'https://media.vipkidresource.com/',
-            ],
-            wx:[
-              'https://wx.vipkidstatic.com/',
-              'https://wx.vipkidresource.com/',
-            ],
-          }
-        },
-        bgcolor: '0xffffff',
-        engineVersion: "0.0.39",
-        container: document.querySelector('#vf-container'),
-        onReady: function () {
-
-        },
-        onError: function () {
-
-        },
-        onMessage: function () {
-
-        },
-        onDispose: function () {
-
-        },
-        onSceneCreate: function () {
-
-        }
-      });
-
+      CreateVF(VF_CONFIG)
     </script>
 </body>
 
