@@ -1,4 +1,4 @@
-const VFSParser = require('./VFScriptParser.js').default;
+const VFSParser = require("@vf.js/vfx").default
 const VFSP = new VFSParser();
 module.exports = function (context, options) {
   if (context.components) {

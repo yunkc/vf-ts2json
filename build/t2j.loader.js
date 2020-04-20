@@ -1,4 +1,4 @@
-const vfxLoader = require('./loader/vfx/index')
+const vfxLoader = require('./loader/vfx')
 
 module.exports = [
   {
