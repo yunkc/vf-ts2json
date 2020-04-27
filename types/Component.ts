@@ -122,8 +122,37 @@ export namespace gui {
         height: number,
         radius?: number,
     }
+    export interface Evaluater extends Base, DisplayComponent {
+        type: guiType.EVALUATER,
+        appId?: string ,
+        userId?: string ,
+        env?: string ,
+        sdkType?: string ,
+        debug?: boolean ,
+        audioFormat?: string ,
+        mediaCheck?: boolean ,
+        initRecorder?: boolean ,
+        recorderMinTime?: number ,
+        autoStopMinRecord?: boolean ,
+        refText?: string ,
+        keyWords?: string ,
+        textMode?: number ,
+        evalMode?: number,
+        rank?: number ,
+        resultMode?: number ,
+        receiveTimeout?: number ,
+        recorderMinTime_start?: number ,
+        autoStopMinRecord_start?: boolean ,
+        recorderMaxTime?: number ,
+        autoStopMaxRecord?: boolean ,
+        useVAD?: boolean ,
+        vadSensivity?: number ,
+        vadDuration?: number ,
+        vadMaxRecordDuration?: number ,
+        vadAutoStop?: boolean 
+    } 
 
-    export type AllGUI = gui.Button | gui.Custom | gui.Text | gui.Image | gui.Checkbox | gui.Rect
+    export type AllGUI = gui.Button | gui.Custom | gui.Text | gui.Image | gui.Checkbox | gui.Rect | gui.Evaluater
 }
 
 export enum guiType {
@@ -154,4 +183,5 @@ export enum guiType {
     GRAPHIC = 'graphic',
     // CUSTOM
     CUSTOM = 'custom',
+    EVALUATER = 'Evaluater'
 }
