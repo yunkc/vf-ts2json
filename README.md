@@ -3,6 +3,9 @@ Use Typescript build JSON files
 
 ## Release Note
 
+### 04.27.2020
+add `EVA` component ts types check
+
 ### 01.05.2020
 1. Add Loader module
 2. Refactor t2j build module
