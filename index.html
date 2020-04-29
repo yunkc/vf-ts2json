@@ -3,8 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport"
-        content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="viewport" content="width=device-width,initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="full-screen" content="true" />
     <meta name="screen-orientation" content="portrait" />
@@ -24,78 +23,37 @@
 
 <body>
     <div id="vf-container"></div>
+    <script src="node_modules/@vf.js/launcher/dist/launcher.min.js"></script>
     <script>
       const VF_CONFIG = {
-        src: './vf-json/index.json',
         debug: true,
-        vfvars: {
-          cdns: {
-            default:[
-              'https://s.vipkidstatic.com/',
-              'https://s.vipkidresource.com/',
-            ],
-            image:[
-              'https://img.vipkidstatic.com/',
-              'https://img.vipkidresource.com/',
-            ],
-            media:[
-              'https://media.vipkidstatic.com/',
-              'https://media.vipkidresource.com/',
-            ],
-            wx:[
-              'https://wx.vipkidstatic.com/',
-              'https://wx.vipkidresource.com/',
-            ],
-          }
-        },
         bgcolor: '0xffffff',
-        engineVersion: "0.0.39",
         container: document.querySelector('#vf-container')
       }
 
-      function CreateVF(option = {}) {
-        let errorLoadCount = 0;
-        function createVF() {
-          const vf = new VF(option);
-
-          //详细的接口，可搜索：IVFEngine -> EngineAPI
-          vf.onReady = option.onReady || function(){}
-          vf.onError = option.onError || function(){}
-          vf.onMessage = option.onMessage || function(){}
-          vf.onDispose = option.onDispose || function(){}
-          vf.onSceneCreate = option.onSceneCreate || function(){}
-        }
-        function loadScript(index){
-          var cdn = option.vfvars.cdns.default;
-          var s = document.createElement('script');
-          s.async = false;
-          s.src = cdn[index] + '/vf/engine/vf-engine-v' + option.engineVersion + '/vf.js?v=' + option.fixVersion;
-          s.addEventListener('load', loadComplete, false);
-          s.addEventListener('error', loadError, false);
-          document.body.appendChild(s);
-        }
-        function loadComplete() {
-          removeEvent(this);
-          createVF();
-        }
-        function loadError() {
-          removeEvent(this);
-          if(errorLoadCount>3){
-            throw ' [LOG VF] vf.js load error';
-            return;
+      createVF(VF_CONFIG, function (player) {
+          player.onReady = function() {
+            console.log("onReady"); //初始化完成
           }
-          loadScript(1);
-          errorLoadCount++;
-        }
-        function removeEvent(thisObj){
-          thisObj.parentNode.removeChild(thisObj);
-          thisObj.removeEventListener('load', loadComplete, false);
-          thisObj.removeEventListener('error', loadError, false);
-        }
-        loadScript(0);
-      }
 
-      CreateVF(VF_CONFIG)
+          player.onSceneCreate = function() {
+            console.log("onSceneCreate"); //资源加载完成
+          }
+
+          player.onMessage = function(msg) {
+            console.log("onMessage ==>", msg);
+          }
+
+          player.onError = function(evt) {
+            console.log("onError ==>", evt);
+          }
+
+          player.onDispose = function() {
+            console.log("onDispose");
+          }
+
+          player.play('./vf-json/index.json')
+        });
     </script>
 </body>
 
