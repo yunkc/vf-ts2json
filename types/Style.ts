@@ -1,24 +1,27 @@
 export namespace Style {
-    export enum Display {
+    export enum display {
         grid = 'grid',
-        block = 'block'
+        block = 'block',
+        none = 'none'
     }
-    export enum Position {
-        absolute = 'absolute'
+    export enum position {
+        absolute = 'absolute',
+        fixed = 'fixed',
+        static = 'static'
     }
-    export enum TextAlign {
+    export enum textAlign {
         left = 'left',
         right = 'right',
         center = 'center'
     }
-    export enum FontStyle {
+    export enum fontStyle {
         normal = 'normal',
         italic = 'italic',
     }
-    export enum FontVariant {
+    export enum fontVariant {
         normal = 'normal',
     }
-    export enum FontWeight {
+    export enum fontWeight {
         normal = 'normal',
         bold = 'bold',
         bolder = 'bolder',
@@ -26,7 +29,7 @@ export namespace Style {
     }
 }
 export interface StyleSheet {
-    display?: Style.Display,
+    display?: Style.display | string,
     width?: number,
     height?: number,
     minWidth?: number,
@@ -43,7 +46,7 @@ export interface StyleSheet {
     skewY? : number,
     rotate?: number,
     pivotY?: number,
-    position?: Style.Position,
+    position?: Style.position | string,
     tint?: number,
     zIndex?: number,
     alpha?: number,
@@ -52,13 +55,13 @@ export interface StyleSheet {
     letterSpacing? : number,
     wordWrap?: boolean,
     wordWrapWidth?: number,
-    textAlign?: Style.TextAlign,
+    textAlign?: Style.textAlign | string,
     lineHeight?: number,
     fontFamily?: string | string[],
     fontSize? : number,
-    fontStyle? : Style.FontStyle,
-    fontVariant?: Style.FontVariant,
-    fontWeight? : Style.FontWeight,
+    fontStyle? : Style.fontStyle | string,
+    fontVariant?: Style.fontVariant | string,
+    fontWeight? : Style.fontWeight | number,
     padding? : number,
     stroke? : number,
     strokeThickness?: number,
@@ -69,8 +72,16 @@ export interface StyleSheet {
     dropShadowColor?: string,
     dropShadowDistance?: number,
     breakWords? : boolean,
-    gridSize?: number[],
-    gridTemplateRow?: number,
-    gridTemplateColumns?: number,
-    filter?: any
+    gridTemplateColumns?: any[],
+    gridColumnGap?: number,
+    gridTemplateRows?: any[],
+    gridRowGap? : number,
+    filter?: any,
+    maskImage?: string,
+    maskSize?: number[],
+    maskPosition?: number[],
+    justifyContent?: string,
+    alignContent?: string,
+    visibility? : boolean,
+    backgroundColor?: number
 }
