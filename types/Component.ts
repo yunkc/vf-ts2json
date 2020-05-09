@@ -1,5 +1,5 @@
-import {ActionType} from "./Action";
-import {StyleSheet} from "./Style";
+import { ActionType } from "./Action";
+import { StyleSheet } from "./Style";
 
 export namespace gui {
     interface Base {
@@ -17,22 +17,26 @@ export namespace gui {
         rotation?: any;
         width?: number;
         height?: number;
-        filterBlur?: number,
-        interactabled?: boolean
+        filterBlur?: number;
+        interactabled?: boolean;
+        style?: any;
+        dragOption?: any,
+        pivotX?: number;
+        pivotY?: number;
     }
 
     export interface Button extends Base, DisplayComponent {
-        type: guiType.BUTTON,
+        type: guiType.Button,
         up: number | string,
         move: number | string,
         down: number | string,
         upAndSelected?: number | string,
         downAndSelected?: number | string,
-        moveAndSelected?: number | string,
+        moveAndSelected?: number | string
     }
 
     export interface Custom extends Base, DisplayComponent {
-        type: guiType.CUSTOM,
+        type: guiType.Custom,
         children?: CustomChildrenItem[],
         animations?: AnimationItem[],
         props?: object,
@@ -54,7 +58,7 @@ export namespace gui {
     }
 
     export interface ITimeline {
-        type: TimelineType;
+        type: TimelineType | string;
         loop?: boolean;
         frames: IFrame[];
     }
@@ -65,36 +69,56 @@ export namespace gui {
         curve?: number[];
     }
 
-    export const enum TimelineType {
-        X = 'x',
-        Y = 'y',
-        SCALE_X = 'scaleX',
-        SCALE_Y = 'scaleY',
-        ROTATION = 'rotation',
-        COLOR = 'color',
-        ALPHA = 'alpha',
-        VISIBLE = 'visible',
-        TEXT = 'text',
-        PROGRESS = 'progress',
-        SKEW_X = 'skewX',
-        SKEW_Y = 'skewY',
-        PLAY = 'play',
-        VOLUME = 'volume',
-        ENABLED = 'enabled',
-        FILTER_BLUR = 'filterBlur',
-        EVENT = 'event',
+    export const enum LinePosition {
+        leftTop = 'leftTop',
+        centerTop = 'centerTop',
+        rightTop = 'rightTop',
+        leftCenter = 'leftCenter',
+        center = 'center',
+        rightCenter = 'rightCenter',
+        leftBottom = 'leftBottom',
+        centerBottom = 'centerBottom',
+        rightBottom = 'rightBottom'
     }
 
-    export interface CustomChildrenItem extends DisplayComponent{
-        name?: string,
+    export const enum TimelineType {
+        x = 'x',
+        y = 'y',
+        scaleX = 'scaleX',
+        scaleY = 'scaleY',
+        rotation = 'rotation',
+        color = 'color',
+        alpha = 'alpha',
+        visible = 'visible',
+        text = 'text',
+        progress = 'progress',
+        skewX = 'skewX',
+        skewY = 'skewY',
+        play = 'play',
+        volume = 'volume',
+        enabled = 'enabled',
+        filterBlur = 'filterBlur',
+        event = 'event',
+    }
+
+    export interface CustomChildrenItem extends Base, DisplayComponent{
         text?: string
         style?: StyleSheet
         id: string | number,
-        libId: string | number
+        libId: string | number,
+        loop?: boolean,
+        loopCount?: number,
+        autoPlay?: boolean,
+        animationSpeed?: number,
+        animationName ?: string,
+        isPlay?: boolean,
+        lineColor?: number,
+        lineWidth?: number,
+        radius?: number
     }
 
     export interface Checkbox extends Base, DisplayComponent{
-        type: guiType.CHECKBOX,
+        type: guiType.CheckBox,
         up: string,
         down: string,
         move: string,
@@ -106,24 +130,88 @@ export namespace gui {
     }
 
     export interface Image extends Base, DisplayComponent {
-        type: guiType.IMAGE,
+        type: guiType.Image,
         src: string | number
     }
 
     export interface Text extends Base, DisplayComponent {
-        type: guiType.TEXT,
-        style?: StyleSheet
+        type: guiType.Text,
+        style?: StyleSheet,
+        text? : String,
+        resolution?: number
     }
 
     export interface Rect extends Base, DisplayComponent {
-        type: guiType.RECT,
-        color: number
-        width: number,
-        height: number,
+        type: guiType.Rect,
+        lineWidth?: number,
         radius?: number,
+        lineColor?: number,
+        anchorX?: number,
+        anchorY?: number
     }
+
+    export interface Circle extends Base, DisplayComponent {
+        type: guiType.Circle,
+        lineWidth?: number,
+        anchorX?: number,
+        anchorY?: number,
+        radius?: number,
+        lineColor?: number,
+    }
+
+    export interface TextInput extends Base, DisplayComponent {
+        type: guiType.TextInput,
+        text?: string,
+        placeholder?: string,
+        maxLength?: string,
+        restrict? : any,
+        up?: number | string,
+        down?: number | string,
+        move?: number | string,
+        disabled?: number | string
+    }
+
+    export interface Slider extends Base, DisplayComponent {
+        type: guiType.Slider,
+        maxValue?: number,
+        minValue?: number,
+        thumb?: number | string,
+        track?: number | string,
+        tracklight?: number | string,
+        value?: number | string,
+        vertical?: boolean
+    }
+
+    export interface ConnectLine extends Base, DisplayComponent {
+        type: guiType.ConnectLine,
+        play?: number,
+        autoPlay?: boolean,
+        source?: string | object,
+        sourcePosition?: string | number,
+        target?: string | object,
+        targetPosition?: LinePosition | number[],
+        lineColor?: number,
+        lineWidth?: number,
+        isAnimation?: boolean,
+        isClear?: boolean,
+    }
+
+    export interface FollowLine extends Base, DisplayComponent {
+        type: guiType.FollowLine,
+        lineColor?: number,
+        source?: string[],
+        role?: string,
+        isErasing?: boolean,
+        isPause?: boolean
+    }
+
+    export interface SpriteAnimated extends Base, DisplayComponent {
+        type: guiType.SpriteAnimated,
+        src?: string | number,
+    }
+
     export interface Evaluater extends Base, DisplayComponent {
-        type: guiType.EVALUATER,
+        type: guiType.Evaluater,
         appId?: string ,
         userId?: string ,
         env?: string ,
@@ -149,39 +237,39 @@ export namespace gui {
         vadSensivity?: number ,
         vadDuration?: number ,
         vadMaxRecordDuration?: number ,
-        vadAutoStop?: boolean 
-    } 
+        vadAutoStop?: boolean
+    }
 
-    export type AllGUI = gui.Button | gui.Custom | gui.Text | gui.Image | gui.Checkbox | gui.Rect | gui.Evaluater
+    export type AllGUI = gui.Button | gui.Custom | gui.Text | gui.Image | gui.Checkbox |
+                         gui.Rect | gui.SpriteAnimated | gui.Circle | gui.Evaluater |
+                         gui.FollowLine | gui.ConnectLine | gui.Slider | gui.TextInput
 }
 
 export enum guiType {
-    // UI
-    CONTAINER = 'container',
-    TABLE = 'table',
-    IMAGE = 'Image',
-    BUTTON = 'Button',
-    RADIO = 'CheckBox',
-    CHECKBOX = 'CheckBox',
-    INPUT = 'input',
-    SLIDER = 'slider',
-    TEXT = 'Label',
-    RECT = 'Rect',
-    CIRCLE = 'Circle',
-    // ANI
-    DRAGONBONES = 'dragonbones',
-    PARTICLE = 'particle',
-    SHEET = 'sheet',
-    // MEDIA
-    VIDEO = 'video',
-    AUDIO = 'audio',
-    MICROPHONE = 'microphone',
-    // NPM
-    NPM = 'npm',
-    // VECTOR
-    SVG = 'svg',
-    GRAPHIC = 'graphic',
-    // CUSTOM
-    CUSTOM = 'custom',
-    EVALUATER = 'Evaluater'
+    Rect = 'Rect',
+    Text = 'Label',
+    Image = 'Image',
+    Custom = 'custom',
+    Slider = 'Slider',
+    Circle = 'Circle',
+    Button = 'Button',
+    CheckBox = 'CheckBox',
+    TextInput = 'TextInput',
+    Evaluater = 'Evaluater',
+    FollowLine = 'FollowLine',
+    ConnectLine = 'ConnectLine',
+    SpriteAnimated = 'SpriteAnimated',
+
+    // Table = 'table',
+    // Input = 'input',
+    // Graphic = 'graphic',
+    // Container = 'container',
+    // Dragonbones = 'dragonbones',
+    // Particle = 'particle',
+    // Sheet = 'sheet',
+    // Video = 'video',
+    // Audio = 'audio',
+    // Microphone = 'microphone',
+    // js = 'js'
+    // svg = 'svg',
 }
