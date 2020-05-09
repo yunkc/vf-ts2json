@@ -79,12 +79,11 @@ export enum LoadMode {
 }
 
 export enum AssetType {
-    IMAGE = 'image',
-    SOUND = 'sound',
-    SHEET = 'sheet',
-    SVG = 'svg',
-    FONT = 'font',
-    AUDIO = 'audio',
-    VIDEO = 'video',
-    JS = 'js',
+    js = 'js',
+    svg = 'svg',
+    image = 'image',
+    sheet = 'sheet',
+    font = 'font',
+    audio = 'audio',
+    video = 'video',
 }
