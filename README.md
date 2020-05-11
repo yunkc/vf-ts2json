@@ -3,6 +3,28 @@ Use Typescript build JSON files
 
 ## Release Note
 
+### 05.11.2020
+- fix deep require `.ts` files trigger browser reload, but not latest `vf` json data
+- improve build reload experience
+
+### 05.09.2020
+- Add `Circle` component type check
+- Add `Anime` component type check
+- Add `TextInput` component type check
+- Add `Slider` component type check
+- Add `ConnectLine` component type check
+- Add `FollowLine` component type check
+- Add `SpriteAnimated` component type check
+- Add `LinePosition` enum
+- Change components `type` lowercase
+- Change `guiType` property capitalize
+- Change `AssetType` use way
+- Change `Style` property to lowercase
+- Change `StyleSheet` interface  
+- Remove old help link
+- Remove `bgcolor` in `index.html` vf init config
+- Other detail improve
+
 ### 04.27.2020
 add `EVA` component ts types check
 
