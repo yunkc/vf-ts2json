@@ -23,9 +23,8 @@ setTimeout(() => {
   Log.info(`Dist .JSON files target path: ${distJSON}`)
 }, 400)
 
-watcher.on('change', path => {
-  delete require.cache[path]
-  delete require.cache[CONFIG.entry]
+watcher.on('change', () => {
+  Utils.deleteRequireCache(require.cache)
 
   let entryJSFile;
   try {
@@ -77,7 +76,12 @@ watcher.on('change', path => {
 });
 
 if (fse.existsSync(`${process.cwd()}/index.html`)) {
-  liveServer()
+  liveServer({
+    watch: [
+      'index.html',
+      CONFIG.output,
+    ],
+  })
 
   setTimeout(() => {
     checkUpdate()

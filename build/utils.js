@@ -30,7 +30,23 @@ function checkEntryName(filePath) {
   return filePath;
 }
 
+// todo 提高定位精度
+function deleteRequireCache(caches, rule = /node_modules/) {
+  const ignorePath = process.cwd() + '/node_modules'
+  const ignoreReg = ignorePath.split('/').join('\\/')
+  const regex = new RegExp(ignoreReg)
+
+  const cacheKeys = Object.keys(caches);
+  const cacheKeysLength = cacheKeys.length
+
+  for (let i = 0; i < cacheKeysLength; i++) {
+    !regex.test(cacheKeys[i]) && delete require.cache[cacheKeys[i]]
+    // if (!regex.test(cacheKeys[i])) {delete require.cache[cacheKeys[i]]}
+  }
+}
+
 module.exports = {
   Log,
-  checkEntryName
+  checkEntryName,
+  deleteRequireCache,
 }
