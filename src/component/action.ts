@@ -1,4 +1,4 @@
-export const rootAction = `
+export default `
     @this = {
         // 这里是第一层，也叫顶层。
         this.on("Add", () => {

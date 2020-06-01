@@ -1,5 +1,5 @@
+import action from "./action"
 import {App, Ids} from "../store";
-import {rootAction} from "./actionlist"
 import {gui, guiType} from "../../types/Component";
 import {Components} from "../../types/IVFTemplate";
 
@@ -37,7 +37,7 @@ const root: gui.Custom = {
         }
     ],
     // 用 VFX 编写的可执行逻辑，文档请见 https://vipkid-edu.github.io/vf-docs/handbook/action.html
-    actionList: rootAction
+    actionList: action
 };
 
 const allComponents: Components = {
