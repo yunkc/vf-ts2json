@@ -182,6 +182,18 @@ export namespace gui {
         vertical?: boolean
     }
 
+    export interface ScrollBar extends Base, DisplayComponent {
+        type: guiType.ScrollBar,
+        source?: string,
+        maxValue?: number,
+        minValue?: number,
+        thumb?: number | string,
+        track?: number | string,
+        tracklight?: number | string,
+        value?: number | string,
+        vertical?: boolean
+    }
+
     export interface ConnectLine extends Base, DisplayComponent {
         type: guiType.ConnectLine,
         play?: number,
@@ -242,7 +254,8 @@ export namespace gui {
 
     export type AllGUI = gui.Button | gui.Custom | gui.Text | gui.Image | gui.Checkbox |
                          gui.Rect | gui.SpriteAnimated | gui.Circle | gui.Evaluater |
-                         gui.FollowLine | gui.ConnectLine | gui.Slider | gui.TextInput
+                         gui.FollowLine | gui.ConnectLine | gui.Slider | gui.TextInput |
+                         gui.ScrollBar
 }
 
 export enum guiType {
@@ -254,6 +267,7 @@ export enum guiType {
     Circle = 'Circle',
     Button = 'Button',
     CheckBox = 'CheckBox',
+    ScrollBar = 'ScrollBar',
     TextInput = 'TextInput',
     Evaluater = 'Evaluater',
     FollowLine = 'FollowLine',

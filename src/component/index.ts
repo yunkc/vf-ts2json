@@ -1,6 +1,7 @@
-import {App, Ids} from "./store";
-import {gui, guiType} from "../types/Component";
-import {Components} from "../types/IVFTemplate";
+import {App, Ids} from "../store";
+import {rootAction} from "./actionlist"
+import {gui, guiType} from "../../types/Component";
+import {Components} from "../../types/IVFTemplate";
 
 const dinoWidth = 83
 const dino: gui.Image = {
@@ -36,7 +37,7 @@ const root: gui.Custom = {
         }
     ],
     // 用 VFX 编写的可执行逻辑，文档请见 https://vipkid-edu.github.io/vf-docs/handbook/action.html
-    actionList: []
+    actionList: rootAction
 };
 
 const allComponents: Components = {
