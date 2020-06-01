@@ -252,10 +252,17 @@ export namespace gui {
         vadAutoStop?: boolean
     }
 
+    export interface Audio extends Base, DisplayComponent {
+        type: guiType.Audio,
+        src: number | string,
+        autoplay?: boolean,
+        loop?: boolean
+    }
+
     export type AllGUI = gui.Button | gui.Custom | gui.Text | gui.Image | gui.Checkbox |
                          gui.Rect | gui.SpriteAnimated | gui.Circle | gui.Evaluater |
                          gui.FollowLine | gui.ConnectLine | gui.Slider | gui.TextInput |
-                         gui.ScrollBar
+                         gui.ScrollBar  | gui.Audio
 }
 
 export enum guiType {
@@ -273,6 +280,7 @@ export enum guiType {
     FollowLine = 'FollowLine',
     ConnectLine = 'ConnectLine',
     SpriteAnimated = 'SpriteAnimated',
+    Audio = 'Audio',
 
     // Table = 'table',
     // Input = 'input',
@@ -282,7 +290,6 @@ export enum guiType {
     // Particle = 'particle',
     // Sheet = 'sheet',
     // Video = 'video',
-    // Audio = 'audio',
     // Microphone = 'microphone',
     // js = 'js'
     // svg = 'svg',
