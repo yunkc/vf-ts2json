@@ -29,7 +29,33 @@
           "x": 395
         }
       ],
-      "actionList": []
+      "actionList": [
+        {
+          "type": 35,
+          "value": "// 这里是第一层，也叫顶层。"
+        },
+        {
+          "type": 13,
+          "event": "Add",
+          "target": [
+            11,
+            []
+          ],
+          "execute": [
+            {
+              "type": 35,
+              "value": "// 这里是第二层"
+            },
+            {
+              "type": 0,
+              "value": [
+                0,
+                "Hello, world"
+              ]
+            }
+          ]
+        }
+      ]
     },
     "1": {
       "type": "Image",
