@@ -30,7 +30,6 @@ function checkEntryName(filePath) {
   return filePath;
 }
 
-// todo 提高定位精度
 function deleteRequireCache(caches, rule = /node_modules/) {
   const ignorePath = process.cwd() + '/node_modules'
   const ignoreReg = ignorePath.split('/').join('\\/')

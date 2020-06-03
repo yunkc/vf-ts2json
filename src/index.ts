@@ -1,6 +1,3 @@
-/*
-*  开发文档: https://code.vipkid.com.cn/xyz/docs
-* */
 import {App} from './store'
 import scenes from './scene'
 import assets from './assets'
