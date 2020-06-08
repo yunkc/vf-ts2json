@@ -3,6 +3,8 @@ const axios = require('axios')
 // parseInt(new Date().getTime() / (60 * 1000))
 // 15:05:20.474
 // 26430187
+
+// todo: add vf cli update notice feature
 module.exports =  function () {
   const timestamp = parseInt(new Date().getTime() / (60 * 1000))
   axios.get(`https://s.vipkidstatic.com/vf/engine/engine.json?v=${timestamp}`).then( res => {
