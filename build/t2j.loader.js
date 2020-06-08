@@ -1,4 +1,5 @@
 const vfxLoader = require('./loader/vfx')
+const launcherVersionPatch = require('./loader/launcherVersionPatch')
 
 module.exports = [
   {
@@ -6,4 +7,9 @@ module.exports = [
     options: {},
     install: vfxLoader
   },
+  {
+    name: 'launcher-version-patch',
+    options: {},
+    install: launcherVersionPatch
+  }
 ];

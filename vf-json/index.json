@@ -80,5 +80,6 @@
   "baseUrl": "",
   "loadMode": "all",
   "conversion": "",
-  "scaleMode": "showAll"
+  "scaleMode": "showAll",
+  "launcherVersion": "0.4.3"
 }
