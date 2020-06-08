@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "debug": "node build/t2j.core.js",
-    "start": "node build/h.js | tsc -w | node build/t2j.core.js"
+    "start": "node build/h.js | tsc -w | node build/t2j.core.js",
+    "update": "node build/update.js"
   },
   "author": "haojenma",
   "license": "ISC",
@@ -18,5 +19,8 @@
     "fs-extra": "^8.1.0",
     "live-server": "^1.2.1",
     "require-json5": "^1.0.2"
+  },
+  "devDependencies": {
+    "download-git-repo": "^3.0.2"
   }
 }
